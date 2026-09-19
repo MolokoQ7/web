@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="uk">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Шкільне радіо 37</title>
+        <style>
+            :root {
+                --p: #6d3bd1;
+                --p2: #9b70ed;
+                --bg: #f7f4fc;
+                --text: #24212b;
+                --muted: #77717f;
+                --card: #fff
+            }
+
+            * {
+                box-sizing: border-box
+            }
+
+            body {
+                margin: 0;
+                background: var(--bg);
+                font-family: Arial,sans-serif;
+                color: var(--text)
+            }
+
+            header {
+                background: linear-gradient(135deg,var(--p),var(--p2));
+                color: #fff;
+                padding: 34px 18px 28px;
+                text-align: center
+            }
+
+            .logo {
+                font-size: 42px
+            }
+
+            .brand {
+                font-size: 30px;
+                font-weight: 800;
+                margin: 5px 0
+            }
+
+            .sub {
+                opacity: .9
+            }
+
+            nav {
+                background: #fff;
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding: 12px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                box-shadow: 0 3px 15px #0001
+            }
+
+            nav button,.btn {
+                border: 0;
+                border-radius: 12px;
+                padding: 11px 15px;
+                font-weight: 700;
+                cursor: pointer;
+                background: #eee8fa;
+                color: #5527a8
+            }
+
+            nav button.active,.btn.primary {
+                background: var(--p);
+                color: white
+            }
+
+            button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {
+                outline: 3px solid #b99af0;
+                outline-offset: 2px
+            }
+
+            .btn:disabled,.option:disabled {
+                opacity: .6;
+                cursor: not-allowed
+            }
+
+            main {
+                max-width: 950px;
+                margin: auto;
+                padding: 22px 15px 50px
+            }
+
+            .page {
+                display: none
+            }
+
+            .page.active {
+                display: block
+            }
+
+            .card {
+                background: var(--card);
+                border-radius: 20px;
+                padding: 20px;
+                margin: 14px 0;
+                box-shadow: 0 8px 25px #34205d0b
+            }
+
+            .news {
+                border-left: 5px solid var(--p)
+            }
+
+            .tag {
+                display: inline-block;
+                background: #eee6ff;
+                color: #5b2ab3;
+                border-radius: 20px;
+                padding: 6px 10px;
+                font-size: 12px;
+                font-weight: 700
+            }
+
+            h1,h2,h3 {
+                margin-top: 0
+            }
+
+            .meta {
+                font-size: 13px;
+                color: var(--muted)
+            }
+
+            .hero {
+                background: white;
+                border-radius: 24px;
+                padding: 25px;
+                box-shadow: 0 8px 25px #34205d0b
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+                gap: 14px
+            }
+
+            input,textarea,select {
+                width: 100%;
+                padding: 13px;
+                border: 1px solid #ddd6e8;
+                border-radius: 12px;
+                font: inherit;
+                margin: 7px 0 13px
+            }
+
+            textarea {
+                min-height: 130px
+            }
+
+            .option {
+                width: 100%;
+                text-align: left;
+                border: 1px solid #e4d9f7;
+                background: #faf8ff;
+                border-radius: 14px;
+                padding: 13px;
+                margin: 6px 0;
+                cursor: pointer;
+                font: inherit
+            }
+
+            .option:hover:not(:disabled) {
+                background: #f0e8ff
+            }
+
+            .bar {
+                height: 9px;
+                background: #e8e5eb;
+                border-radius: 9px;
+                overflow: hidden
+            }
+
+            .fill {
+                height: 100%;
+                background: var(--p)
+            }
+
+            .admin {
+                border: 2px solid #d8c7fa
+            }
+
+            .notice {
+                padding: 12px;
+                border-radius: 12px;
+                background: #f3eff9;
+                font-size: 13px;
+                color: #625a6d;
+                overflow: hidden
+            }
+
+            .error {
+                color: #b3261e;
+                font-size: 14px;
+                min-height: 20px;
+                margin: 0 0 10px
+            }
+
+            .row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap
+            }
+
+            [hidden] {
+                display: none !important
+            }
+
+            footer {
+                text-align: center;
+                color: #8a8392;
+                padding: 20px
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="logo">📻</div>
+            <div class="brand">Шкільне радіо 37</div>
+            <div class="sub">Новини • Події • Голосування • Шкільне життя</div>
+        </header>
+        <nav>
+            <button class="active" onclick="show('home',this)">Головна</button>
+            <button onclick="show('news',this)">📰 Новини</button>
+            <button onclick="show('poll',this)">🗳️ Голосування</button>
+            <button onclick="show('events',this)">📅 Події</button>
+            <button onclick="show('admin',this)">🔐 Адмін</button>
+        </nav>
+        <main>
+            <section id="home" class="page active">
+                <div class="hero">
+                    <h1>Вітаємо на «Шкільному радіо 37»!</h1>
+                    <p>Тут зібрані важливі шкільні новини, оголошення, події та інтерактиви для учнів.</p>
+                    <button class="btn primary" onclick="show('news',document.querySelectorAll('nav button')[1])">Переглянути новини</button>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h3>📰 Новини</h3>
+                        <p>Свіжі оголошення та події школи.</p>
+                    </div>
+                    <div class="card">
+                        <h3>🗳️ Голосування</h3>
+                        <p>Твоя думка може впливати на шкільні активності.</p>
+                    </div>
+                    <div class="card">
+                        <h3>📅 Події</h3>
+                        <p>Дивись, що відбувається найближчим часом.</p>
+                    </div>
+                </div>
+            </section>
+            <section id="news" class="page">
+                <h2>📰 Останні новини</h2>
+                <div id="newsList"></div>
+            </section>
+            <section id="poll" class="page">
+                <h2>🗳️ Голосування</h2>
+                <div class="card">
+                    <h3>Які шкільні активності вам подобаються найбільше?</h3>
+                    <div id="pollOptions"></div>
+                    <div id="pollResults"></div>
+                </div>
+            </section>
+            <section id="events" class="page">
+                <h2>📅 Найближчі події</h2>
+                <div id="eventsList" class="grid"></div>
+            </section>
+            <section id="admin" class="page">
+                <!-- Вхід -->
+                <div id="adminLogin" class="card admin">
+                    <h2>🔐 Вхід для адміністратора</h2>
+                    <label for="pw">Пароль</label>
+                    <input id="pw" type="password" placeholder="Введи пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+                    <p id="loginError" class="error" role="alert"></p>
+                    <button class="btn primary" id="loginBtn" onclick="login()">Увійти</button>
+                </div>
+                <!-- Панель (видима тільки після входу) -->
+                <div id="adminPanel" class="card admin" hidden>
+                    <div class="row">
+                        <h2 style="margin:0">🔐 Панель адміністратора</h2>
+                        <button class="btn" onclick="logout()">Вийти</button>
+                    </div>
+                    <h3 style="margin-top:20px">Додати новину</h3>
+                    <input id="title" placeholder="Заголовок новини" maxlength="150">
+                    <select id="cat">
+                        <option>Школа</option>
+                        <option>Оголошення</option>
+                        <option>Події</option>
+                        <option>8 клас</option>
+                    </select>
+                    <textarea id="body" placeholder="Текст новини" maxlength="5000"></textarea>
+                    <button class="btn primary" id="publishBtn" onclick="addNews()">Опублікувати новину</button>
+                    <h3 style="margin-top:28px">Керування новинами</h3>
+                    <div id="adminNews"></div>
+                </div>
+            </section>
+        </main>
+        <footer>© 2026 Шкільне радіо 37</footer>
+        <script>
+            const events = [["Спортивний день", "П'ятниця", "Спортивна форма та готовність активно рухатися."], ["Шкільні події", "Незабаром", "Нові події з'являтимуться тут."], ["Учнівські ініціативи", "Протягом року", "Пропонуйте ідеї через шкільне радіо."]];
+            const options = ["Спортивні заходи", "Творчі конкурси", "Квести та ігри", "Тематичні дні"];
+
+            const $ = id => document.getElementById(id);
+            let adminPassword = sessionStorage.getItem("r37pw") || "";
+            let newsCache = [];
+
+            function esc(s) {
+                return String(s).replace(/[&<>"']/g, x => ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[x]))
+            }
+
+            // Усі запити до сервера. Пароль додається лише якщо ми увійшли як адмін.
+            async function api(path, opts = {}) {
+                const headers = {
+                    "content-type": "application/json"
+                };
+                if (adminPassword)
+                    headers["x-admin-password"] = adminPassword;
+                const res = await fetch("/api" + path, {
+                    ...opts,
+                    headers
+                });
+                const data = await res.json().catch( () => ({}));
+                if (!res.ok)
+                    throw Object.assign(new Error(data.error || "Помилка сервера"), {
+                        status: res.status
+                    });
+                return data
+            }
+
+            /* ---------- Новини ---------- */
+            async function renderNews() {
+                try {
+                    newsCache = await api("/news")
+                } catch (e) {
+                    $("newsList").innerHTML = `<div class="card"><p class="error">Не вдалося завантажити новини. Спробуй оновити сторінку.</p></div>`;
+                    return
+                }
+                $("newsList").innerHTML = newsCache.map(n => `<article class="card news"><span class="tag">${esc(n.cat)}</span><h2>${esc(n.title)}</h2><p>${esc(n.body)}</p><div class="meta">${esc(n.date)}</div></article>`).join("");
+                renderAdminNews()
+            }
+            function renderAdminNews() {
+                $("adminNews").innerHTML = newsCache.map(n => {
+                    // Стартові новини (seed-…) не зберігаються на сервері, тому їх не можна видалити
+                    const canDelete = /^\d{15}$/.test(n.id);
+                    return `<div class="notice" style="margin:7px 0"><b>${esc(n.title)}</b>${canDelete ? `<button class="btn" style="float:right;padding:6px 9px" onclick="delNews('${n.id}')">Видалити</button>` : ""}</div>`
+                }
+                ).join("")
+            }
+            async function addNews() {
+                const t = $("title").value.trim()
+                  , b = $("body").value.trim();
+                if (!t || !b) {
+                    alert("Заповни заголовок і текст.");
+                    return
+                }
+                $("publishBtn").disabled = true;
+                try {
+                    await api("/news", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            title: t,
+                            cat: $("cat").value,
+                            body: b
+                        })
+                    });
+                    $("title").value = "";
+                    $("body").value = "";
+                    await renderNews();
+                    alert("Новину опубліковано!")
+                } catch (e) {
+                    handleAdminError(e)
+                } finally {
+                    $("publishBtn").disabled = false
+                }
+            }
+            async function delNews(id) {
+                if (!confirm("Видалити цю новину?"))
+                    return;
+                try {
+                    await api("/news/" + id, {
+                        method: "DELETE"
+                    });
+                    await renderNews()
+                } catch (e) {
+                    handleAdminError(e)
+                }
+            }
+            function handleAdminError(e) {
+                if (e.status === 401) {
+                    alert("Сесія закінчилась. Увійди ще раз.");
+                    logout()
+                } else
+                    alert(e.message)
+            }
+
+            /* ---------- Вхід адміна ---------- */
+            function setAdminView(loggedIn) {
+                $("adminLogin").hidden = loggedIn;
+                $("adminPanel").hidden = !loggedIn
+            }
+            async function login() {
+                $("loginError").textContent = "";
+                adminPassword = $("pw").value;
+                if (!adminPassword) {
+                    $("loginError").textContent = "Введи пароль.";
+                    return
+                }
+                $("loginBtn").disabled = true;
+                try {
+                    await api("/login", {
+                        method: "POST"
+                    });
+                    sessionStorage.setItem("r37pw", adminPassword);
+                    $("pw").value = "";
+                    setAdminView(true)
+                } catch (e) {
+                    adminPassword = "";
+                    $("loginError").textContent = e.status === 401 ? "Невірний пароль." : "Не вдалося увійти. Спробуй ще раз."
+                } finally {
+                    $("loginBtn").disabled = false
+                }
+            }
+            function logout() {
+                adminPassword = "";
+                sessionStorage.removeItem("r37pw");
+                setAdminView(false)
+            }
+            async function restoreSession() {
+                if (!adminPassword)
+                    return;
+                try {
+                    await api("/login", {
+                        method: "POST"
+                    });
+                    setAdminView(true)
+                } catch (e) {
+                    logout()
+                }
+            }
+
+            /* ---------- Події ---------- */
+            function renderEvents() {
+                $("eventsList").innerHTML = events.map(e => `<div class="card"><span class="tag">${esc(e[1])}</span><h3>${esc(e[0])}</h3><p>${esc(e[2])}</p></div>`).join("")
+            }
+
+            /* ---------- Голосування ---------- */
+            // Результати спільні для всіх (на сервері). Один голос на браузер перевіряється лише тут,
+            // тому це "чесне слово", а не захист: хитрун може очистити дані браузера й проголосувати ще раз.
+            async function renderPoll() {
+                const voted = localStorage.getItem("r37voted") === "1";
+                $("pollOptions").innerHTML = options.map( (x, i) => `<button class="option" ${voted ? "disabled" : ""} onclick="vote(${i})">${esc(x)}</button>`).join("") + (voted ? `<p class="meta">Дякуємо, твій голос враховано.</p>` : "");
+                let v = {};
+                try {
+                    v = await api("/poll")
+                } catch (e) {
+                    $("pollResults").innerHTML = `<p class="error">Не вдалося завантажити результати.</p>`;
+                    return
+                }
+                const total = Object.values(v).reduce( (a, b) => a + b, 0);
+                $("pollResults").innerHTML = options.map( (x, i) => {
+                    const n = v[i] || 0
+                      , p = total ? Math.round(n / total * 100) : 0;
+                    return `<p class="meta">${esc(x)}: ${p}% (${n})</p><div class="bar"><div class="fill" style="width:${p}%"></div></div>`
+                }
+                ).join("")
+            }
+            async function vote(i) {
+                if (localStorage.getItem("r37voted") === "1")
+                    return;
+                try {
+                    await api("/poll", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            i
+                        })
+                    });
+                    localStorage.setItem("r37voted", "1")
+                } catch (e) {
+                    alert("Не вдалося проголосувати. Спробуй ще раз.")
+                }
+                renderPoll()
+            }
+
+            /* ---------- Навігація ---------- */
+            function show(id, btn) {
+                document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
+                $(id).classList.add("active");
+                document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+                if (btn)
+                    btn.classList.add("active");
+                scrollTo(0, 0)
+            }
+
+            renderNews();
+            renderEvents();
+            renderPoll();
+            restoreSession();
+        </script>
+    </body>
+</html>
