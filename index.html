@@ -220,11 +220,490 @@
                 color: #8a8392;
                 padding: 20px
             }
+
+            .logo {
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent
+            }
+
+            /* ---------- Адмін: інтерфейс ---------- */
+            .login-card {
+                max-width: 420px;
+                margin: 26px auto;
+                background: var(--card);
+                border-radius: 24px;
+                padding: 36px 28px 28px;
+                box-shadow: 0 18px 50px #34205d1a;
+                text-align: center;
+                position: relative;
+                overflow: hidden
+            }
+
+            .login-card::before {
+                content: "";
+                position: absolute;
+                inset: 0 0 auto 0;
+                height: 6px;
+                background: linear-gradient(90deg,var(--p),var(--p2))
+            }
+
+            .login-badge {
+                width: 72px;
+                height: 72px;
+                margin: 0 auto 14px;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                font-size: 32px;
+                background: linear-gradient(135deg,#efe6ff,#e0d0fb);
+                box-shadow: 0 8px 20px #6d3bd133
+            }
+
+            .login-card h2 {
+                margin-bottom: 6px
+            }
+
+            .login-hint {
+                color: var(--muted);
+                font-size: 14px;
+                margin: 0 0 22px
+            }
+
+            .login-card label {
+                display: block;
+                text-align: left;
+                font-weight: 700;
+                font-size: 14px
+            }
+
+            .login-card .error {
+                text-align: left
+            }
+
+            .pw-wrap {
+                position: relative
+            }
+
+            .pw-wrap input {
+                padding-right: 54px
+            }
+
+            .pw-toggle {
+                position: absolute;
+                right: 6px;
+                top: 10px;
+                width: 40px;
+                height: 40px;
+                border: 0;
+                background: transparent;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 18px
+            }
+
+            .pw-toggle:hover {
+                background: #f0e8ff
+            }
+
+            .btn.wide {
+                width: 100%;
+                padding: 14px
+            }
+
+            .shake {
+                animation: shake .4s
+            }
+
+            @keyframes shake {
+                20%,60% {
+                    transform: translateX(-8px)
+                }
+                40%,80% {
+                    transform: translateX(8px)
+                }
+            }
+
+            .adm-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+                background: linear-gradient(135deg,var(--p),var(--p2));
+                color: #fff;
+                border-radius: 24px;
+                padding: 22px 24px;
+                box-shadow: 0 12px 30px #6d3bd130
+            }
+
+            .adm-head h2 {
+                margin: 2px 0 0;
+                font-size: 24px
+            }
+
+            .adm-kicker {
+                font-size: 12px;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                opacity: .85;
+                font-weight: 700
+            }
+
+            .adm-logout {
+                background: #ffffff26;
+                color: #fff
+            }
+
+            .adm-logout:hover {
+                background: #ffffff40
+            }
+
+            .adm-stats {
+                display: grid;
+                grid-template-columns: repeat(3,1fr);
+                gap: 12px;
+                margin: 14px 0
+            }
+
+            .stat {
+                background: var(--card);
+                border-radius: 18px;
+                padding: 14px 10px;
+                text-align: center;
+                box-shadow: 0 8px 25px #34205d0b
+            }
+
+            .stat-num {
+                font-size: 28px;
+                font-weight: 800;
+                color: var(--p);
+                line-height: 1.1
+            }
+
+            .stat-label {
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 2px
+            }
+
+            .adm-tabs {
+                display: flex;
+                gap: 6px;
+                background: #eae3f7;
+                padding: 5px;
+                border-radius: 16px;
+                margin: 6px 0 4px
+            }
+
+            .adm-tab {
+                flex: 1;
+                border: 0;
+                border-radius: 12px;
+                padding: 12px 10px;
+                font: inherit;
+                font-weight: 700;
+                cursor: pointer;
+                background: transparent;
+                color: #5527a8;
+                transition: background .15s,box-shadow .15s
+            }
+
+            .adm-tab.active {
+                background: #fff;
+                box-shadow: 0 4px 14px #34205d1f
+            }
+
+            .adm-tab:hover:not(.active) {
+                background: #ffffff80
+            }
+
+            .adm-pane .card h3 {
+                font-size: 18px;
+                margin-bottom: 14px
+            }
+
+            .adm-pane label,.adm-pane .lbl {
+                display: block;
+                font-weight: 700;
+                font-size: 14px
+            }
+
+            .adm-pane .lbl small {
+                font-weight: 400;
+                color: var(--muted)
+            }
+
+            .count {
+                font-size: 12px;
+                color: var(--muted);
+                text-align: right;
+                margin: -8px 2px 12px
+            }
+
+            .chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 7px 0 14px
+            }
+
+            .adm-pane .chip {
+                position: relative;
+                display: inline-block;
+                cursor: pointer;
+                font-weight: 600
+            }
+
+            .chip input {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+                margin: 0
+            }
+
+            .chip span {
+                display: inline-block;
+                padding: 9px 14px;
+                border-radius: 999px;
+                border: 1px solid #e4d9f7;
+                background: #faf8ff;
+                color: #5527a8;
+                font-size: 14px;
+                transition: background .15s,color .15s,box-shadow .15s
+            }
+
+            .chip:hover span {
+                background: #f0e8ff
+            }
+
+            .chip input:checked + span {
+                background: var(--p);
+                border-color: var(--p);
+                color: #fff;
+                box-shadow: 0 4px 12px #6d3bd140
+            }
+
+            .chip input:focus-visible + span {
+                outline: 3px solid #b99af0;
+                outline-offset: 2px
+            }
+
+            .arow {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 12px 14px;
+                margin: 8px 0;
+                border: 1px solid #efe9fa;
+                border-radius: 14px;
+                background: #fcfbff;
+                transition: box-shadow .15s,border-color .15s
+            }
+
+            .arow:hover {
+                border-color: #d8c7fa;
+                box-shadow: 0 6px 18px #34205d12
+            }
+
+            .arow-main {
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                align-items: flex-start
+            }
+
+            .arow-title {
+                font-weight: 700;
+                overflow-wrap: anywhere
+            }
+
+            .icon-btn {
+                flex: none;
+                width: 42px;
+                height: 42px;
+                border: 0;
+                border-radius: 12px;
+                background: #eee8fa;
+                cursor: pointer;
+                font-size: 16px;
+                transition: background .15s
+            }
+
+            .icon-btn:hover {
+                background: #e2d6f8
+            }
+
+            .icon-btn.danger {
+                background: #fde8e6
+            }
+
+            .icon-btn.danger:hover {
+                background: #fbd3cf
+            }
+
+            .empty {
+                text-align: center;
+                color: var(--muted);
+                padding: 18px 0;
+                margin: 0
+            }
+
+            .opt-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin: 7px 0 12px
+            }
+
+            .opt-row {
+                display: flex;
+                gap: 8px;
+                align-items: center
+            }
+
+            .opt-row input {
+                margin: 0;
+                flex: 1
+            }
+
+            .add-opt {
+                background: #faf8ff;
+                border: 1px dashed #cdb8f5
+            }
+
+            .save-row {
+                margin-top: 18px
+            }
+
+            .danger-zone {
+                border: 1px solid #f3c9c5;
+                background: #fffafa
+            }
+
+            .btn.danger {
+                background: #c62828;
+                color: #fff
+            }
+
+            .btn.danger:hover {
+                background: #b01f1f
+            }
+
+            .dlg {
+                border: 0;
+                border-radius: 22px;
+                padding: 24px;
+                width: min(420px,calc(100vw - 32px));
+                box-shadow: 0 30px 80px #1a0f3355;
+                color: var(--text)
+            }
+
+            .dlg::backdrop {
+                background: #1a0f3388
+            }
+
+            .dlg h3 {
+                margin-bottom: 8px
+            }
+
+            .dlg p {
+                margin: 0
+            }
+
+            .dlg-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 20px;
+                flex-wrap: wrap
+            }
+
+            .toasts {
+                position: fixed;
+                left: 50%;
+                bottom: 22px;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 50;
+                align-items: center;
+                pointer-events: none;
+                width: max-content;
+                max-width: calc(100vw - 32px)
+            }
+
+            .toast {
+                background: #2b2238;
+                color: #fff;
+                padding: 12px 18px;
+                border-radius: 14px;
+                box-shadow: 0 12px 30px #0004;
+                font-size: 14px;
+                font-weight: 600;
+                animation: pop .25s ease-out;
+                transition: opacity .3s,transform .3s
+            }
+
+            .toast.ok::before {
+                content: "✅ "
+            }
+
+            .toast.err {
+                background: #b3261e
+            }
+
+            .toast.err::before {
+                content: "⚠️ "
+            }
+
+            .toast.out {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            @keyframes pop {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px)
+                }
+                to {
+                    opacity: 1;
+                    transform: none
+                }
+            }
+
+            @media (max-width:520px) {
+                .adm-head {
+                    padding: 18px
+                }
+                .adm-head h2 {
+                    font-size: 20px
+                }
+                .stat-num {
+                    font-size: 22px
+                }
+                .login-card {
+                    padding: 30px 20px 22px
+                }
+            }
+
+            @media (prefers-reduced-motion:reduce) {
+                * {
+                    animation: none !important;
+                    transition: none !important
+                }
+            }
         </style>
     </head>
     <body>
         <header>
-            <div class="logo">📻</div>
+            <div class="logo" id="logo">📻</div>
             <div class="brand">Шкільне радіо 37</div>
             <div class="sub">Новини • Події • Голосування • Шкільне життя</div>
         </header>
@@ -233,7 +712,7 @@
             <button onclick="show('news',this)">📰 Новини</button>
             <button onclick="show('poll',this)">🗳️ Голосування</button>
             <button onclick="show('events',this)">📅 Події</button>
-            <button onclick="show('admin',this)">🔐 Адмін</button>
+            <button id="navAdmin" hidden onclick="show('admin',this)">🔐 Адмін</button>
         </nav>
         <main>
             <section id="home" class="page active">
@@ -275,45 +754,104 @@
             </section>
             <section id="admin" class="page">
                 <!-- Вхід -->
-                <div id="adminLogin" class="card admin">
-                    <h2>🔐 Вхід для адміністратора</h2>
+                <div id="adminLogin" class="login-card">
+                    <div class="login-badge" aria-hidden="true">🔐</div>
+                    <h2>Вхід для адміністратора</h2>
+                    <p class="login-hint">Тільки для тих, хто керує новинами та голосуваннями «Шкільного радіо 37».</p>
                     <label for="pw">Пароль</label>
-                    <input id="pw" type="password" placeholder="Введи пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+                    <div class="pw-wrap">
+                        <input id="pw" type="password" placeholder="Введи пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+                        <button type="button" class="pw-toggle" id="pwToggle" onclick="togglePw()" aria-label="Показати пароль">👁</button>
+                    </div>
                     <p id="loginError" class="error" role="alert"></p>
-                    <button class="btn primary" id="loginBtn" onclick="login()">Увійти</button>
+                    <button class="btn primary wide" id="loginBtn" onclick="login()">Увійти</button>
                 </div>
+
                 <!-- Панель (видима тільки після входу) -->
-                <div id="adminPanel" class="card admin" hidden>
-                    <div class="row">
-                        <h2 style="margin:0">🔐 Панель адміністратора</h2>
-                        <button class="btn" onclick="logout()">Вийти</button>
+                <div id="adminPanel" hidden>
+                    <div class="adm-head">
+                        <div>
+                            <div class="adm-kicker">Панель керування</div>
+                            <h2>Вітаємо, адміністраторе 👋</h2>
+                        </div>
+                        <button class="btn adm-logout" onclick="signOut()">Вийти</button>
                     </div>
-                    <h3 style="margin-top:20px">Додати новину</h3>
-                    <input id="title" placeholder="Заголовок новини" maxlength="150">
-                    <select id="cat">
-                        <option>Школа</option>
-                        <option>Оголошення</option>
-                        <option>Події</option>
-                        <option>8 клас</option>
-                    </select>
-                    <textarea id="body" placeholder="Текст новини" maxlength="5000"></textarea>
-                    <button class="btn primary" id="publishBtn" onclick="addNews()">Опублікувати новину</button>
-                    <h3 style="margin-top:28px">Керування новинами</h3>
-                    <div id="adminNews"></div>
-                    <h3 style="margin-top:28px">Голосування</h3>
-                    <label for="pollQ">Питання</label>
-                    <input id="pollQ" maxlength="200" placeholder="Питання для голосування" oninput="pollFormDirty=true">
-                    <label for="pollOpts">Варіанти (кожен з нового рядка, від 2 до 6)</label>
-                    <textarea id="pollOpts" style="min-height:110px" oninput="pollFormDirty=true"></textarea>
-                    <div class="row" style="justify-content:flex-start">
-                        <button class="btn primary" id="pollSaveBtn" onclick="savePoll()">Зберегти нове голосування</button>
-                        <button class="btn" id="pollResetBtn" onclick="resetPoll()">Скинути результати</button>
+
+                    <div class="adm-stats">
+                        <div class="stat"><div class="stat-num" id="statNews">–</div><div class="stat-label">новин</div></div>
+                        <div class="stat"><div class="stat-num" id="statVotes">–</div><div class="stat-label">голосів</div></div>
+                        <div class="stat"><div class="stat-num" id="statOpts">–</div><div class="stat-label">варіантів</div></div>
                     </div>
-                    <p class="meta">Нове питання чи варіанти обнуляють результати. «Скинути результати» залишає питання, але всі зможуть проголосувати знову.</p>
+
+                    <div class="adm-tabs" role="tablist">
+                        <button role="tab" id="tabNews" class="adm-tab active" aria-selected="true" aria-controls="paneNews" onclick="admTab('News')">📰 Новини</button>
+                        <button role="tab" id="tabPoll" class="adm-tab" aria-selected="false" aria-controls="panePoll" onclick="admTab('Poll')">🗳️ Голосування</button>
+                    </div>
+
+                    <!-- Вкладка «Новини» -->
+                    <div id="paneNews" class="adm-pane" role="tabpanel" aria-labelledby="tabNews">
+                        <div class="card">
+                            <h3>✍️ Нова новина</h3>
+                            <label for="title">Заголовок</label>
+                            <input id="title" placeholder="Наприклад: Змінився розклад дзвінків" maxlength="150" oninput="counter('title','titleCount',150)">
+                            <div class="count" id="titleCount">0 / 150</div>
+                            <span class="lbl" id="catLabel">Категорія</span>
+                            <div class="chips" role="radiogroup" aria-labelledby="catLabel">
+                                <label class="chip"><input type="radio" name="cat" value="Школа" checked><span>🏫 Школа</span></label>
+                                <label class="chip"><input type="radio" name="cat" value="Оголошення"><span>📢 Оголошення</span></label>
+                                <label class="chip"><input type="radio" name="cat" value="Події"><span>🎉 Події</span></label>
+                                <label class="chip"><input type="radio" name="cat" value="8 клас"><span>🎒 8 клас</span></label>
+                            </div>
+                            <label for="body">Текст новини</label>
+                            <textarea id="body" placeholder="Напиши текст новини…" maxlength="5000"></textarea>
+                            <div class="row">
+                                <span class="meta">Новина одразу з'явиться на сайті</span>
+                                <button class="btn primary" id="publishBtn" onclick="addNews()">Опублікувати</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>🗂️ Опубліковані новини</h3>
+                            <div id="adminNews"></div>
+                        </div>
+                    </div>
+
+                    <!-- Вкладка «Голосування» -->
+                    <div id="panePoll" class="adm-pane" role="tabpanel" aria-labelledby="tabPoll" hidden>
+                        <div class="card">
+                            <h3>✏️ Питання й варіанти</h3>
+                            <label for="pollQ">Питання</label>
+                            <input id="pollQ" maxlength="200" placeholder="Питання для голосування" oninput="pollFormDirty=true">
+                            <span class="lbl">Варіанти відповіді <small>(від 2 до 6)</small></span>
+                            <div id="pollOptList" class="opt-list"></div>
+                            <button class="btn add-opt" id="addOptBtn" onclick="addOptRow('')">+ Додати варіант</button>
+                            <div class="row save-row">
+                                <span class="meta">Нове питання чи варіанти обнулять результати</span>
+                                <button class="btn primary" id="pollSaveBtn" onclick="savePoll()">Зберегти голосування</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>📊 Поточні результати</h3>
+                            <div id="admPollResults"></div>
+                        </div>
+                        <div class="card danger-zone">
+                            <h3>⚠️ Скинути результати</h3>
+                            <p class="meta" style="margin:0 0 14px">Питання й варіанти залишаться, але всі голоси буде видалено, і кожен зможе проголосувати знову.</p>
+                            <button class="btn danger" id="pollResetBtn" onclick="resetPoll()">Скинути результати</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
         <footer>© 2026 Шкільне радіо 37</footer>
+        <dialog id="confirmDlg" class="dlg" aria-labelledby="dlgTitle">
+            <h3 id="dlgTitle"></h3>
+            <p id="dlgText" class="meta"></p>
+            <div class="dlg-actions">
+                <button class="btn" id="dlgNo">Скасувати</button>
+                <button class="btn primary" id="dlgYes">Так</button>
+            </div>
+        </dialog>
+        <div id="toasts" class="toasts" aria-live="polite"></div>
         <script>
             const events = [["Спортивний день", "П'ятниця", "Спортивна форма та готовність активно рухатися."], ["Шкільні події", "Незабаром", "Нові події з'являтимуться тут."], ["Учнівські ініціативи", "Протягом року", "Пропонуйте ідеї через шкільне радіо."]];
 
@@ -362,34 +900,37 @@
                 renderAdminNews()
             }
             function renderAdminNews() {
-                $("adminNews").innerHTML = newsCache.map(n => {
+                $("adminNews").innerHTML = newsCache.length ? newsCache.map(n => {
                     // id новини бувають лише двох видів: 15 цифр або seed-N, тому в onclick їх вставляти безпечно
                     const canDelete = /^(\d{15}|seed-\d+)$/.test(n.id);
-                    return `<div class="notice" style="margin:7px 0"><b>${esc(n.title)}</b>${canDelete ? `<button class="btn" style="float:right;padding:6px 9px" onclick="delNews('${n.id}')">Видалити</button>` : ""}</div>`
+                    return `<div class="arow"><div class="arow-main"><span class="tag">${esc(n.cat)}</span><div class="arow-title">${esc(n.title)}</div><div class="meta">${esc(n.date)}</div></div>${canDelete ? `<button class="icon-btn danger" onclick="delNews('${n.id}')" title="Видалити" aria-label="Видалити новину: ${esc(n.title)}">🗑️</button>` : ""}</div>`
                 }
-                ).join("")
+                ).join("") : `<p class="empty">Новин поки немає. Опублікуй першу вище 👆</p>`;
+                updateStats()
             }
             async function addNews() {
                 const t = $("title").value.trim()
                   , b = $("body").value.trim();
                 if (!t || !b) {
-                    alert("Заповни заголовок і текст.");
+                    toast("Заповни заголовок і текст.", "err");
                     return
                 }
+                const cat = document.querySelector('input[name="cat"]:checked').value;
                 $("publishBtn").disabled = true;
                 try {
                     await api("/news", {
                         method: "POST",
                         body: JSON.stringify({
                             title: t,
-                            cat: $("cat").value,
+                            cat,
                             body: b
                         })
                     });
                     $("title").value = "";
                     $("body").value = "";
+                    counter("title", "titleCount", 150);
                     await renderNews();
-                    alert("Новину опубліковано!")
+                    toast("Новину опубліковано!")
                 } catch (e) {
                     handleAdminError(e)
                 } finally {
@@ -397,31 +938,41 @@
                 }
             }
             async function delNews(id) {
-                if (!confirm("Видалити цю новину?"))
+                if (!await confirmDialog("Видалити новину?", "Її більше не буде видно на сайті.", "Видалити", true))
                     return;
                 try {
                     await api("/news/" + id, {
                         method: "DELETE"
                     });
-                    await renderNews()
+                    await renderNews();
+                    toast("Новину видалено.")
                 } catch (e) {
                     handleAdminError(e)
                 }
             }
             function handleAdminError(e) {
                 if (e.status === 401) {
-                    alert("Сесія закінчилась. Увійди ще раз.");
+                    toast("Сесія закінчилась. Увійди ще раз.", "err");
                     logout()
                 } else
-                    alert(e.message)
+                    toast(e.message, "err")
             }
 
             /* ---------- Вхід адміна ---------- */
             function setAdminView(loggedIn) {
                 $("adminLogin").hidden = loggedIn;
                 $("adminPanel").hidden = !loggedIn;
-                if (loggedIn)
-                    fillPollForm()
+                if (loggedIn) {
+                    $("navAdmin").hidden = false;
+                    fillPollForm();
+                    updateStats()
+                }
+            }
+            function shakeLogin() {
+                const c = document.querySelector(".login-card");
+                c.classList.remove("shake");
+                void c.offsetWidth;
+                c.classList.add("shake")
             }
             async function login() {
                 $("loginError").textContent = "";
@@ -440,7 +991,8 @@
                     setAdminView(true)
                 } catch (e) {
                     adminPassword = "";
-                    $("loginError").textContent = e.status === 401 ? "Невірний пароль." : "Не вдалося увійти. Спробуй ще раз."
+                    $("loginError").textContent = e.status === 401 ? "Невірний пароль." : "Не вдалося увійти. Спробуй ще раз.";
+                    shakeLogin()
                 } finally {
                     $("loginBtn").disabled = false
                 }
@@ -449,6 +1001,10 @@
                 adminPassword = "";
                 sessionStorage.removeItem("r37pw");
                 setAdminView(false)
+            }
+            function signOut() {
+                logout();
+                show("home", document.querySelector("nav button"))
             }
             async function restoreSession() {
                 if (!adminPassword)
@@ -470,7 +1026,7 @@
 
             /* ---------- Голосування ---------- */
             // Результати й питання зберігаються на сервері. Чи голосував цей браузер, визначає сервер (cookie),
-            // тому очищення localStorage не допоможе проголосувати ще раз.
+            // тому очищення даних сайту в браузері не допоможе проголосувати ще раз.
             let pollData = null
               , pollFormDirty = false;
             async function renderPoll() {
@@ -486,12 +1042,15 @@
                 $("pollQuestion").textContent = poll.question;
                 $("pollOptions").innerHTML = poll.options.map( (x, i) => `<button class="option" ${voted ? "disabled" : ""} onclick="vote(${i})">${esc(x)}</button>`).join("") + (voted ? `<p class="meta">Дякуємо, твій голос враховано.</p>` : "");
                 const total = Object.values(poll.votes).reduce( (a, b) => a + b, 0);
-                $("pollResults").innerHTML = poll.options.map( (x, i) => {
+                const results = poll.options.map( (x, i) => {
                     const n = poll.votes[i] || 0
                       , p = total ? Math.round(n / total * 100) : 0;
                     return `<p class="meta">${esc(x)}: ${p}% (${n})</p><div class="bar"><div class="fill" style="width:${p}%"></div></div>`
                 }
                 ).join("") + `<p class="meta" style="margin-top:14px">Усього голосів: ${total}</p>`;
+                $("pollResults").innerHTML = results;
+                $("admPollResults").innerHTML = results;
+                updateStats();
                 if (!$("adminPanel").hidden)
                     fillPollForm()
             }
@@ -507,31 +1066,59 @@
                         })
                     })
                 } catch (e) {
-                    alert(e.status === 409 || e.status === 429 ? e.message : "Не вдалося проголосувати. Спробуй ще раз.")
+                    toast(e.status === 409 || e.status === 429 ? e.message : "Не вдалося проголосувати. Спробуй ще раз.", "err")
                 }
                 renderPoll()
             }
 
             /* ---------- Голосування: керування (адмін) ---------- */
+            const optInputs = () => [...document.querySelectorAll("#pollOptList .opt-input")];
+            function optRowHtml(v) {
+                return `<div class="opt-row"><input class="opt-input" maxlength="80" placeholder="Варіант відповіді" value="${esc(v)}" oninput="pollFormDirty=true"><button type="button" class="icon-btn" onclick="removeOptRow(this)" title="Прибрати" aria-label="Прибрати варіант">✕</button></div>`
+            }
+            function syncOptButtons() {
+                $("addOptBtn").disabled = optInputs().length >= 6
+            }
+            function setOptRows(list) {
+                $("pollOptList").innerHTML = list.map(optRowHtml).join("");
+                syncOptButtons()
+            }
+            function addOptRow(v) {
+                if (optInputs().length >= 6)
+                    return;
+                $("pollOptList").insertAdjacentHTML("beforeend", optRowHtml(v));
+                pollFormDirty = true;
+                syncOptButtons();
+                optInputs().pop().focus()
+            }
+            function removeOptRow(btn) {
+                if (optInputs().length <= 2) {
+                    toast("Потрібно мінімум 2 варіанти.", "err");
+                    return
+                }
+                btn.closest(".opt-row").remove();
+                pollFormDirty = true;
+                syncOptButtons()
+            }
             function fillPollForm(force) {
                 if (!pollData || (pollFormDirty && !force))
                     return;
                 $("pollQ").value = pollData.poll.question;
-                $("pollOpts").value = pollData.poll.options.join("\n");
+                setOptRows(pollData.poll.options);
                 pollFormDirty = false
             }
             async function savePoll() {
                 const question = $("pollQ").value.trim();
-                const options = $("pollOpts").value.split("\n").map(x => x.trim()).filter(Boolean);
+                const options = optInputs().map(x => x.value.trim()).filter(Boolean);
                 if (!question) {
-                    alert("Впиши питання.");
+                    toast("Впиши питання.", "err");
                     return
                 }
                 if (options.length < 2 || options.length > 6) {
-                    alert("Потрібно від 2 до 6 варіантів, кожен з нового рядка.");
+                    toast("Потрібно від 2 до 6 непорожніх варіантів.", "err");
                     return
                 }
-                if (!confirm("Зберегти нове голосування? Поточні результати буде видалено."))
+                if (!await confirmDialog("Зберегти нове голосування?", "Поточні результати буде видалено, і всі зможуть проголосувати знову.", "Зберегти", true))
                     return;
                 $("pollSaveBtn").disabled = true;
                 try {
@@ -545,7 +1132,7 @@
                     pollFormDirty = false;
                     await renderPoll();
                     fillPollForm(true);
-                    alert("Голосування оновлено.")
+                    toast("Голосування оновлено.")
                 } catch (e) {
                     handleAdminError(e)
                 } finally {
@@ -553,16 +1140,83 @@
                 }
             }
             async function resetPoll() {
-                if (!confirm("Скинути всі голоси? Усі зможуть проголосувати знову."))
+                if (!await confirmDialog("Скинути результати?", "Усі голоси буде видалено, і кожен зможе проголосувати знову.", "Скинути", true))
                     return;
                 try {
                     await api("/poll/reset", {
                         method: "POST"
                     });
                     await renderPoll();
-                    alert("Результати скинуто.")
+                    toast("Результати скинуто.")
                 } catch (e) {
                     handleAdminError(e)
+                }
+            }
+
+            /* ---------- Інтерфейс адмінки: підказки, підтвердження, вкладки ---------- */
+            function toast(msg, type="ok") {
+                const t = document.createElement("div");
+                t.className = "toast " + type;
+                t.textContent = msg;
+                $("toasts").appendChild(t);
+                setTimeout( () => {
+                    t.classList.add("out");
+                    setTimeout( () => t.remove(), 300)
+                }
+                , 3200)
+            }
+            function confirmDialog(title, text, yesLabel="Підтвердити", danger=false) {
+                return new Promise(resolve => {
+                    const d = $("confirmDlg")
+                      , yes = $("dlgYes")
+                      , no = $("dlgNo");
+                    $("dlgTitle").textContent = title;
+                    $("dlgText").textContent = text;
+                    yes.textContent = yesLabel;
+                    yes.className = "btn " + (danger ? "danger" : "primary");
+                    const done = v => {
+                        yes.onclick = no.onclick = d.onclick = d.onclose = null;
+                        if (d.open)
+                            d.close();
+                        resolve(v)
+                    }
+                    ;
+                    yes.onclick = () => done(true);
+                    no.onclick = () => done(false);
+                    d.onclick = e => {
+                        if (e.target === d)
+                            done(false)
+                    }
+                    ;
+                    d.onclose = () => done(false);
+                    d.showModal();
+                    no.focus()
+                }
+                )
+            }
+            function admTab(name) {
+                for (const n of ["News", "Poll"]) {
+                    const on = n === name;
+                    $("pane" + n).hidden = !on;
+                    $("tab" + n).classList.toggle("active", on);
+                    $("tab" + n).setAttribute("aria-selected", on)
+                }
+            }
+            function counter(id, outId, max) {
+                $(outId).textContent = $(id).value.length + " / " + max
+            }
+            function togglePw() {
+                const i = $("pw")
+                  , show = i.type === "password";
+                i.type = show ? "text" : "password";
+                $("pwToggle").textContent = show ? "🙈" : "👁";
+                $("pwToggle").setAttribute("aria-label", show ? "Сховати пароль" : "Показати пароль")
+            }
+            function updateStats() {
+                $("statNews").textContent = newsCache.length;
+                if (pollData) {
+                    $("statVotes").textContent = Object.values(pollData.poll.votes).reduce( (a, b) => a + b, 0);
+                    $("statOpts").textContent = pollData.poll.options.length
                 }
             }
 
@@ -573,13 +1227,43 @@
                 document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
                 if (btn)
                     btn.classList.add("active");
+                if (!adminPassword)
+                    $("navAdmin").hidden = id !== "admin";
                 scrollTo(0, 0)
             }
+
+            /* ---------- Секретний вхід для адміна ---------- */
+            // Кнопки «Адмін» у меню немає. Відкрити вхід можна двома способами:
+            // 1) швидко натиснути на логотип 📻 п'ять разів; 2) відкрити сайт з адресою, що закінчується на #staff37
+            // Щоб змінити секретне слово в адресі, поміняй ADMIN_HASH нижче.
+            const ADMIN_HASH = "#staff37";
+            function openAdmin() {
+                $("navAdmin").hidden = false;
+                show("admin", $("navAdmin"))
+            }
+            let logoTaps = 0
+              , logoTimer;
+            $("logo").addEventListener("click", () => {
+                logoTaps++;
+                clearTimeout(logoTimer);
+                logoTimer = setTimeout( () => logoTaps = 0, 2000);
+                if (logoTaps >= 5) {
+                    logoTaps = 0;
+                    openAdmin()
+                }
+            }
+            );
+            function checkHash() {
+                if (location.hash === ADMIN_HASH)
+                    openAdmin()
+            }
+            window.addEventListener("hashchange", checkHash);
 
             renderNews();
             renderEvents();
             renderPoll();
             restoreSession();
+            checkHash();
         </script>
     </body>
 </html>
