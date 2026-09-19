@@ -1,5 +1,5 @@
 // Сервер для «Шкільного радіо 37».
-// Читати новини та голосувати може кожен, а публікувати й видаляти — тільки адмін.
+// Читати новини та голосувати може кожен, а публікувати, видаляти й керувати голосуванням — тільки адмін.
 // Пароль адміна зберігається в змінній середовища ADMIN_PASSWORD (Netlify → Site configuration → Environment variables).
 
 import { getStore } from "@netlify/blobs";
@@ -8,7 +8,16 @@ import { createHash, timingSafeEqual } from "node:crypto";
 export const config = { path: "/api/*" };
 
 const CATEGORIES = ["Школа", "Оголошення", "Події", "8 клас"];
-const POLL_OPTIONS = 4; // має збігатися з кількістю варіантів у index.html
+
+// Скільки голосів дозволено з однієї мережі за одне голосування.
+// У школі багато учнів сидять на одному Wi-Fi (для сайту це одна адреса), тому ліміт великий:
+// він зупиняє скрипти-накрутку, але не заважає чесним учням.
+const MAX_VOTES_PER_NETWORK = 40;
+
+const DEFAULT_POLL = {
+  question: "Які шкільні активності вам подобаються найбільше?",
+  options: ["Спортивні заходи", "Творчі конкурси", "Квести та ігри", "Тематичні дні"],
+};
 
 const SEED = [
   {
@@ -27,10 +36,10 @@ const SEED = [
   },
 ];
 
-const json = (data, status = 200) =>
+const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers },
   });
 
 // Порівняння паролів без витоку інформації через час відповіді
@@ -51,8 +60,38 @@ async function readBody(req) {
   }
 }
 
-export default async (req) => {
-  const store = getStore("radio37");
+function getCookie(req, name) {
+  const header = req.headers.get("cookie") || "";
+  for (const part of header.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k === name) return v.join("=");
+  }
+  return null;
+}
+
+// ---------- Голосування: допоміжні функції ----------
+async function loadPoll(store) {
+  const saved = await store.get("poll", { type: "json" });
+  if (saved) return saved;
+  // Голосування ще не змінювали: беремо стандартне (і голоси зі старої версії сайту, якщо були)
+  const legacy = (await store.get("votes", { type: "json" })) || {};
+  return { id: "default", question: DEFAULT_POLL.question, options: [...DEFAULT_POLL.options], votes: legacy };
+}
+
+const publicPoll = (p) => ({ id: p.id, question: p.question, options: p.options, votes: p.votes });
+
+// Нове голосування або скидання: новий id означає, що всі можуть проголосувати знову
+async function saveNewPoll(store, { question, options }) {
+  const poll = { id: String(Date.now()), question, options, votes: {} };
+  await store.setJSON("poll", poll);
+  const { blobs } = await store.list({ prefix: "ipvotes:" });
+  await Promise.all(blobs.map((b) => store.delete(b.key)));
+  return poll;
+}
+
+export default async (req, context) => {
+  // "strong" = після запису дані одразу видно всім (за замовчуванням Netlify Blobs може оновлюватись із затримкою до хвилини)
+  const store = getStore({ name: "radio37", consistency: "strong" });
   const path = new URL(req.url).pathname.replace(/\/+$/, "");
   const method = req.method;
 
@@ -64,10 +103,12 @@ export default async (req) => {
   // ---------- Новини ----------
   if (path === "/api/news" && method === "GET") {
     const { blobs } = await store.list({ prefix: "news:" });
-    if (blobs.length === 0) return json(SEED);
-    const items = await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })));
+    const items = (await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })))).filter(Boolean);
     items.sort((x, y) => (x.id < y.id ? 1 : -1)); // нові зверху
-    return json(items);
+    // Стартові новини показуємо внизу, доки адмін їх не видалить
+    const hidden = (await store.get("hidden-seeds", { type: "json" })) || [];
+    const seeds = SEED.filter((n) => !hidden.includes(n.id));
+    return json([...items, ...seeds]);
   }
 
   if (path === "/api/news" && method === "POST") {
@@ -93,25 +134,79 @@ export default async (req) => {
   if (path.startsWith("/api/news/") && method === "DELETE") {
     if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
     const id = decodeURIComponent(path.slice("/api/news/".length));
-    if (!/^\d{15}$/.test(id)) return json({ error: "Цю новину видалити не можна" }, 400);
+    // Стартові новини не лежать у сховищі, тому їх просто позначаємо як приховані
+    if (SEED.some((n) => n.id === id)) {
+      const hidden = (await store.get("hidden-seeds", { type: "json" })) || [];
+      if (!hidden.includes(id)) hidden.push(id);
+      await store.setJSON("hidden-seeds", hidden);
+      return json({ ok: true });
+    }
+    if (!/^\d{15}$/.test(id)) return json({ error: "Новину не знайдено" }, 400);
     await store.delete(`news:${id}`);
     return json({ ok: true });
   }
 
   // ---------- Голосування ----------
+  // Публічне: поточне голосування + чи голосував уже цей браузер (за cookie, яку ставить сервер)
   if (path === "/api/poll" && method === "GET") {
-    const votes = (await store.get("votes", { type: "json" })) || {};
-    return json(votes);
+    const poll = await loadPoll(store);
+    return json({ poll: publicPoll(poll), voted: getCookie(req, "r37v") === poll.id });
   }
 
+  // Публічне: віддати голос
   if (path === "/api/poll" && method === "POST") {
     const body = await readBody(req);
+    const poll = await loadPoll(store);
+
+    if (body?.pollId !== poll.id) {
+      return json({ error: "Голосування щойно оновили. Онови сторінку й спробуй ще раз." }, 409);
+    }
     const i = Number(body?.i);
-    if (!Number.isInteger(i) || i < 0 || i >= POLL_OPTIONS) return json({ error: "Невірний варіант" }, 400);
-    const votes = (await store.get("votes", { type: "json" })) || {};
-    votes[i] = (votes[i] || 0) + 1;
-    await store.setJSON("votes", votes);
-    return json(votes);
+    if (!Number.isInteger(i) || i < 0 || i >= poll.options.length) return json({ error: "Невірний варіант" }, 400);
+
+    // 1) Cookie від сервера. Її не можна прибрати, просто очистивши дані сайту в localStorage
+    if (getCookie(req, "r37v") === poll.id) {
+      return json({ error: "Ти вже голосував(-ла) в цьому голосуванні." }, 409);
+    }
+
+    // 2) Обмеження за мережею (зберігається лише хеш адреси, а не сама адреса)
+    const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || "unknown";
+    const ipHash = createHash("sha256").update(`${poll.id}|${ip}`).digest("hex").slice(0, 16);
+    const ipKey = `ipvotes:${poll.id}`;
+    const ipVotes = (await store.get(ipKey, { type: "json" })) || {};
+    if ((ipVotes[ipHash] || 0) >= MAX_VOTES_PER_NETWORK) {
+      return json({ error: "З цієї мережі вже надто багато голосів." }, 429);
+    }
+
+    poll.votes[i] = (poll.votes[i] || 0) + 1;
+    ipVotes[ipHash] = (ipVotes[ipHash] || 0) + 1;
+    await store.setJSON("poll", poll);
+    await store.setJSON(ipKey, ipVotes);
+
+    const cookie = `r37v=${poll.id}; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`;
+    return json({ poll: publicPoll(poll), voted: true }, 200, { "set-cookie": cookie });
+  }
+
+  // Адмін: нове питання й варіанти (результати обнуляються)
+  if (path === "/api/poll" && method === "PUT") {
+    if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
+    const body = await readBody(req);
+    const question = String(body?.question || "").trim().slice(0, 200);
+    const options = Array.isArray(body?.options)
+      ? body.options.map((o) => String(o).trim().slice(0, 80)).filter(Boolean)
+      : [];
+    if (!question) return json({ error: "Впиши питання" }, 400);
+    if (options.length < 2 || options.length > 6) return json({ error: "Потрібно від 2 до 6 варіантів" }, 400);
+    const poll = await saveNewPoll(store, { question, options });
+    return json({ poll: publicPoll(poll), voted: false });
+  }
+
+  // Адмін: скинути результати (питання й варіанти лишаються, усі можуть проголосувати знову)
+  if (path === "/api/poll/reset" && method === "POST") {
+    if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
+    const current = await loadPoll(store);
+    const poll = await saveNewPoll(store, { question: current.question, options: current.options });
+    return json({ poll: publicPoll(poll), voted: false });
   }
 
   return json({ error: "Не знайдено" }, 404);
