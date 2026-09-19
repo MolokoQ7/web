@@ -362,7 +362,7 @@
 
             .adm-stats {
                 display: grid;
-                grid-template-columns: repeat(3,1fr);
+                grid-template-columns: repeat(4,1fr);
                 gap: 12px;
                 margin: 14px 0
             }
@@ -699,6 +699,24 @@
                     transition: none !important
                 }
             }
+            @media (max-width:520px) {
+                .adm-stats {
+                    gap: 8px
+                }
+                .stat {
+                    padding: 12px 4px
+                }
+                .stat-num {
+                    font-size: 20px
+                }
+                .stat-label {
+                    font-size: 11px
+                }
+                .adm-tab {
+                    padding: 12px 4px;
+                    font-size: 13px
+                }
+            }
         </style>
     </head>
     <body>
@@ -779,12 +797,14 @@
 
                     <div class="adm-stats">
                         <div class="stat"><div class="stat-num" id="statNews">–</div><div class="stat-label">новин</div></div>
+                        <div class="stat"><div class="stat-num" id="statEvents">–</div><div class="stat-label">подій</div></div>
                         <div class="stat"><div class="stat-num" id="statVotes">–</div><div class="stat-label">голосів</div></div>
                         <div class="stat"><div class="stat-num" id="statOpts">–</div><div class="stat-label">варіантів</div></div>
                     </div>
 
                     <div class="adm-tabs" role="tablist">
                         <button role="tab" id="tabNews" class="adm-tab active" aria-selected="true" aria-controls="paneNews" onclick="admTab('News')">📰 Новини</button>
+                        <button role="tab" id="tabEvents" class="adm-tab" aria-selected="false" aria-controls="paneEvents" onclick="admTab('Events')">📅 Події</button>
                         <button role="tab" id="tabPoll" class="adm-tab" aria-selected="false" aria-controls="panePoll" onclick="admTab('Poll')">🗳️ Голосування</button>
                     </div>
 
@@ -812,6 +832,27 @@
                         <div class="card">
                             <h3>🗂️ Опубліковані новини</h3>
                             <div id="adminNews"></div>
+                        </div>
+                    </div>
+
+                    <!-- Вкладка «Події» -->
+                    <div id="paneEvents" class="adm-pane" role="tabpanel" aria-labelledby="tabEvents" hidden>
+                        <div class="card">
+                            <h3>➕ Нова подія</h3>
+                            <label for="evTitle">Назва</label>
+                            <input id="evTitle" placeholder="Наприклад: Осінній ярмарок" maxlength="100">
+                            <label for="evWhen">Коли <small style="font-weight:400;color:var(--muted)">(необов'язково)</small></label>
+                            <input id="evWhen" placeholder="Наприклад: 25 вересня, 15:00" maxlength="40">
+                            <label for="evBody">Опис <small style="font-weight:400;color:var(--muted)">(необов'язково)</small></label>
+                            <textarea id="evBody" style="min-height:90px" placeholder="Кілька слів про подію…" maxlength="500"></textarea>
+                            <div class="row">
+                                <span class="meta">Подія одразу з'явиться на вкладці «Події»</span>
+                                <button class="btn primary" id="evPublishBtn" onclick="addEvent()">Додати подію</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>🗂️ Події на сайті</h3>
+                            <div id="adminEvents"></div>
                         </div>
                     </div>
 
@@ -853,11 +894,11 @@
         </dialog>
         <div id="toasts" class="toasts" aria-live="polite"></div>
         <script>
-            const events = [["Спортивний день", "П'ятниця", "Спортивна форма та готовність активно рухатися."], ["Шкільні події", "Незабаром", "Нові події з'являтимуться тут."], ["Учнівські ініціативи", "Протягом року", "Пропонуйте ідеї через шкільне радіо."]];
 
             const $ = id => document.getElementById(id);
             let adminPassword = sessionStorage.getItem("r37pw") || "";
-            let newsCache = [];
+            let newsCache = []
+              , eventsCache = [];
 
             function esc(s) {
                 return String(s).replace(/[&<>"']/g, x => ({
@@ -1020,8 +1061,64 @@
             }
 
             /* ---------- Події ---------- */
-            function renderEvents() {
-                $("eventsList").innerHTML = events.map(e => `<div class="card"><span class="tag">${esc(e[1])}</span><h3>${esc(e[0])}</h3><p>${esc(e[2])}</p></div>`).join("")
+            async function renderEvents() {
+                try {
+                    eventsCache = await api("/events")
+                } catch (e) {
+                    $("eventsList").innerHTML = `<div class="card"><p class="error">Не вдалося завантажити події. Спробуй оновити сторінку.</p></div>`;
+                    return
+                }
+                $("eventsList").innerHTML = eventsCache.length ? eventsCache.map(e => `<div class="card">${e.when ? `<span class="tag">${esc(e.when)}</span>` : ""}<h3>${esc(e.title)}</h3>${e.body ? `<p>${esc(e.body)}</p>` : ""}</div>`).join("") : `<div class="card"><p class="meta">Поки що подій немає.</p></div>`;
+                renderAdminEvents()
+            }
+            function renderAdminEvents() {
+                $("adminEvents").innerHTML = eventsCache.length ? eventsCache.map(e => {
+                    // id події бувають лише двох видів: 15 цифр або eseed-N, тому в onclick їх вставляти безпечно
+                    const canDelete = /^(\d{15}|eseed-\d+)$/.test(e.id);
+                    return `<div class="arow"><div class="arow-main">${e.when ? `<span class="tag">${esc(e.when)}</span>` : ""}<div class="arow-title">${esc(e.title)}</div></div>${canDelete ? `<button class="icon-btn danger" onclick="delEvent('${e.id}')" title="Видалити" aria-label="Видалити подію: ${esc(e.title)}">🗑️</button>` : ""}</div>`
+                }
+                ).join("") : `<p class="empty">Подій поки немає. Додай першу вище 👆</p>`;
+                updateStats()
+            }
+            async function addEvent() {
+                const title = $("evTitle").value.trim();
+                if (!title) {
+                    toast("Впиши назву події.", "err");
+                    return
+                }
+                $("evPublishBtn").disabled = true;
+                try {
+                    await api("/events", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            title,
+                            when: $("evWhen").value.trim(),
+                            body: $("evBody").value.trim()
+                        })
+                    });
+                    $("evTitle").value = "";
+                    $("evWhen").value = "";
+                    $("evBody").value = "";
+                    await renderEvents();
+                    toast("Подію додано!")
+                } catch (e) {
+                    handleAdminError(e)
+                } finally {
+                    $("evPublishBtn").disabled = false
+                }
+            }
+            async function delEvent(id) {
+                if (!await confirmDialog("Видалити подію?", "Її більше не буде видно на сайті.", "Видалити", true))
+                    return;
+                try {
+                    await api("/events/" + id, {
+                        method: "DELETE"
+                    });
+                    await renderEvents();
+                    toast("Подію видалено.")
+                } catch (e) {
+                    handleAdminError(e)
+                }
             }
 
             /* ---------- Голосування ---------- */
@@ -1195,7 +1292,7 @@
                 )
             }
             function admTab(name) {
-                for (const n of ["News", "Poll"]) {
+                for (const n of ["News", "Events", "Poll"]) {
                     const on = n === name;
                     $("pane" + n).hidden = !on;
                     $("tab" + n).classList.toggle("active", on);
@@ -1214,6 +1311,7 @@
             }
             function updateStats() {
                 $("statNews").textContent = newsCache.length;
+                $("statEvents").textContent = eventsCache.length;
                 if (pollData) {
                     $("statVotes").textContent = Object.values(pollData.poll.votes).reduce( (a, b) => a + b, 0);
                     $("statOpts").textContent = pollData.poll.options.length
