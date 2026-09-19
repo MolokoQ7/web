@@ -36,6 +36,12 @@ const SEED = [
   },
 ];
 
+const EVENT_SEED = [
+  { id: "eseed-1", title: "Спортивний день", when: "П'ятниця", body: "Спортивна форма та готовність активно рухатися." },
+  { id: "eseed-2", title: "Шкільні події", when: "Незабаром", body: "Нові події з'являтимуться тут." },
+  { id: "eseed-3", title: "Учнівські ініціативи", when: "Протягом року", body: "Пропонуйте ідеї через шкільне радіо." },
+];
+
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), {
     status,
@@ -143,6 +149,45 @@ export default async (req, context) => {
     }
     if (!/^\d{15}$/.test(id)) return json({ error: "Новину не знайдено" }, 400);
     await store.delete(`news:${id}`);
+    return json({ ok: true });
+  }
+
+  // ---------- Події ----------
+  if (path === "/api/events" && method === "GET") {
+    const { blobs } = await store.list({ prefix: "event:" });
+    const items = (await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })))).filter(Boolean);
+    items.sort((x, y) => (x.id < y.id ? 1 : -1)); // нові зверху
+    // Стартові події показуємо внизу, доки адмін їх не видалить
+    const hidden = (await store.get("hidden-event-seeds", { type: "json" })) || [];
+    const seeds = EVENT_SEED.filter((e) => !hidden.includes(e.id));
+    return json([...items, ...seeds]);
+  }
+
+  if (path === "/api/events" && method === "POST") {
+    if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
+    const body = await readBody(req);
+    const title = String(body?.title || "").trim().slice(0, 100);
+    const when = String(body?.when || "").trim().slice(0, 40);
+    const text = String(body?.body || "").trim().slice(0, 500);
+    if (!title) return json({ error: "Впиши назву події" }, 400);
+
+    const id = String(Date.now()).padStart(15, "0");
+    const item = { id, title, when, body: text };
+    await store.setJSON(`event:${id}`, item);
+    return json(item, 201);
+  }
+
+  if (path.startsWith("/api/events/") && method === "DELETE") {
+    if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
+    const id = decodeURIComponent(path.slice("/api/events/".length));
+    if (EVENT_SEED.some((e) => e.id === id)) {
+      const hidden = (await store.get("hidden-event-seeds", { type: "json" })) || [];
+      if (!hidden.includes(id)) hidden.push(id);
+      await store.setJSON("hidden-event-seeds", hidden);
+      return json({ ok: true });
+    }
+    if (!/^\d{15}$/.test(id)) return json({ error: "Подію не знайдено" }, 400);
+    await store.delete(`event:${id}`);
     return json({ ok: true });
   }
 
