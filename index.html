@@ -2151,36 +2151,54 @@ footer{color:#bdbdc6!important}
             /* ---------- Анонімка ---------- */
             // Публічна форма: будь-хто надсилає приклад поста без імені й без пароля.
             async function submitAnon() {
-                const title = $("subTitle").value.trim()
-                  , body = $("subBody").value.trim();
+                const title = $("subTitle").value.trim();
+                const body = $("subBody").value.trim();
                 if (!title || !body) {
                     toast("Заповни заголовок і текст.", "err");
-                    return
+                    return;
                 }
-                const cat = document.querySelector('input[name="subCat"]:checked').value
-                  , video = $("subVideo").value.trim();
-                $("subSendBtn").disabled = true;
-                $("subSendBtn").textContent = "Надсилаю…";
+
+                const catInput = document.querySelector('input[name="subCat"]:checked');
+                const cat = catInput ? catInput.value : "Школа";
+                const video = $("subVideo").value.trim();
+                const btn = $("subSendBtn");
+
+                btn.disabled = true;
+                btn.textContent = "Надсилаю…";
+
                 try {
-                    await api("/submissions", {
+                    const res = await fetch("/api/submissions", {
                         method: "POST",
-                        body: JSON.stringify({
-                            title,
-                            cat,
-                            body,
-                            video
-                        })
+                        headers: {
+                            "content-type": "application/json",
+                            "accept": "application/json"
+                        },
+                        body: JSON.stringify({ title, cat, body, video }),
+                        cache: "no-store"
                     });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        const err = new Error(data.error || `Помилка сервера (${res.status})`);
+                        err.status = res.status;
+                        throw err;
+                    }
+
                     $("subTitle").value = "";
                     $("subBody").value = "";
                     $("subVideo").value = "";
                     counter("subTitle", "subTitleCount", 150);
-                    toast("Дякуємо! Твій приклад надіслано анонімно.")
+                    toast("Дякуємо! Твій приклад надіслано анонімно.");
                 } catch (e) {
-                    toast(e.status === 429 ? e.message : "Не вдалося надіслати. Спробуй ще раз.", "err")
+                    console.error("submitAnon:", e);
+                    if (e.name === "TypeError") {
+                        toast("Не вдалося підключитися до сервера. Перевір інтернет і спробуй ще раз.", "err");
+                    } else {
+                        toast(e.message || "Не вдалося надіслати. Спробуй ще раз.", "err");
+                    }
                 } finally {
-                    $("subSendBtn").disabled = false;
-                    $("subSendBtn").textContent = "Надіслати анонімно"
+                    btn.disabled = false;
+                    btn.textContent = "Надіслати анонімно";
                 }
             }
 
