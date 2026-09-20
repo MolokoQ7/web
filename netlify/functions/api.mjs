@@ -9,6 +9,7 @@ import { getStore } from "@netlify/blobs";
 import {
   createHash,
   randomUUID,
+  scryptSync,
   timingSafeEqual
 } from "node:crypto";
 
@@ -163,18 +164,37 @@ function passwordOk(req) {
    АКАУНТИ КОРИСТУВАЧІВ
 ========================================================= */
 
-// Хешування пароля
-function hashPassword(password) {
-  return createHash("sha256")
-    .update(password)
-    .digest("hex");
+function normaliseEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
 }
 
+function validEmail(email) {
+  return email.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      .test(email);
+}
 
-// Перевірка логіну
-function validUsername(username) {
-  return /^[a-zA-Z0-9_]{3,20}$/
-    .test(username);
+function userKey(email) {
+  return "user-email:" +
+    createHash("sha256")
+      .update(email)
+      .digest("hex");
+}
+
+function hashPassword(password, salt) {
+  return scryptSync(
+    password,
+    salt,
+    64
+  ).toString("hex");
+}
+
+function publicUser(user) {
+  return {
+    email: user.email
+  };
 }
 
 
@@ -392,12 +412,10 @@ export default async (
     const body =
       await readBody(req);
 
-    const username =
-      String(
-        body?.username || ""
-      )
-      .trim()
-      .toLowerCase();
+    const email =
+      normaliseEmail(
+        body?.email
+      );
 
     const password =
       String(
@@ -405,13 +423,13 @@ export default async (
       );
 
     if (
-      !validUsername(username)
+      !validEmail(email)
     ) {
 
       return json(
         {
           error:
-            "Логін має містити 3-20 символів: латиниця, цифри або _"
+            "Вкажи коректну електронну пошту"
         },
         400
       );
@@ -430,7 +448,7 @@ export default async (
 
     const existing =
       await store.get(
-        `user:${username}`,
+        userKey(email),
         { type: "json" }
       );
 
@@ -439,7 +457,7 @@ export default async (
       return json(
         {
           error:
-            "Цей логін уже зайнятий"
+            "Акаунт з цією поштою вже існує"
         },
         409
       );
@@ -447,20 +465,39 @@ export default async (
 
     const user = {
       id: randomUUID(),
-      username,
-      password: hashPassword(password),
+      email,
+      passwordSalt: randomUUID(),
       createdAt: Date.now()
     };
 
+    user.password =
+      hashPassword(
+        password,
+        user.passwordSalt
+      );
+
     await store.setJSON(
-      `user:${username}`,
+      userKey(email),
       user
+    );
+
+    const token = randomUUID();
+
+    await store.setJSON(
+      `session:${token}`,
+      {
+        email,
+        expiresAt:
+          Date.now() +
+          30 * 24 * 60 * 60 * 1000
+      }
     );
 
     return json(
       {
         ok: true,
-        username
+        token,
+        user: publicUser(user)
       },
       201
     );
@@ -470,19 +507,17 @@ export default async (
   // ---------- Вхід користувача ----------
 
   if (
-    path === "/api/register-login" &&
+    path === "/api/user-login" &&
     method === "POST"
   ) {
 
     const body =
       await readBody(req);
 
-    const username =
-      String(
-        body?.username || ""
-      )
-      .trim()
-      .toLowerCase();
+    const email =
+      normaliseEmail(
+        body?.email
+      );
 
     const password =
       String(
@@ -491,29 +526,112 @@ export default async (
 
     const user =
       await store.get(
-        `user:${username}`,
+        userKey(email),
         { type: "json" }
       );
 
     if (
       !user ||
-      user.password !==
-        hashPassword(password)
+      !user.passwordSalt ||
+      !timingSafeEqual(
+        Buffer.from(user.password, "hex"),
+        Buffer.from(
+          hashPassword(
+            password,
+            user.passwordSalt
+          ),
+          "hex"
+        )
+      )
     ) {
 
       return json(
         {
           error:
-            "Неправильний логін або пароль"
+            "Неправильна пошта або пароль"
         },
         401
       );
     }
 
+    const token = randomUUID();
+
+    await store.setJSON(
+      `session:${token}`,
+      {
+        email,
+        expiresAt:
+          Date.now() +
+          30 * 24 * 60 * 60 * 1000
+      }
+    );
+
     return json({
       ok: true,
-      username: user.username
+      token,
+      user: publicUser(user)
     });
+  }
+
+
+  if (
+    path === "/api/me" &&
+    method === "GET"
+  ) {
+
+    const token =
+      req.headers.get(
+        "x-user-token"
+      ) || "";
+
+    const session =
+      await store.get(
+        `session:${token}`,
+        { type: "json" }
+      );
+
+    if (!session || session.expiresAt < Date.now()) {
+      if (session) {
+        await store.delete(
+          `session:${token}`
+        );
+      }
+
+      return json({ loggedIn: false });
+    }
+
+    const user =
+      await store.get(
+        userKey(session.email),
+        { type: "json" }
+      );
+
+    return user
+      ? json({
+          loggedIn: true,
+          user: publicUser(user)
+        })
+      : json({ loggedIn: false });
+  }
+
+
+  if (
+    path === "/api/user-logout" &&
+    method === "POST"
+  ) {
+
+    const token =
+      req.headers.get(
+        "x-user-token"
+      ) || "";
+
+    if (token) {
+      await store.delete(
+        `session:${token}`
+      );
+    }
+
+    return json({ ok: true });
   }
 
 
