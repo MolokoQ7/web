@@ -3,7 +3,7 @@
 // Пароль адміна зберігається в змінній середовища ADMIN_PASSWORD (Netlify → Site configuration → Environment variables).
 
 import { getStore } from "@netlify/blobs";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 
 export const config = { path: "/api/*" };
 
@@ -41,6 +41,22 @@ const EVENT_SEED = [
   { id: "eseed-2", title: "Шкільні події", when: "Незабаром", body: "Нові події з'являтимуться тут." },
   { id: "eseed-3", title: "Учнівські ініціативи", when: "Протягом року", body: "Пропонуйте ідеї через шкільне радіо." },
 ];
+
+// ---------- Фото ----------
+const IMG_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const MAX_IMG_BYTES = 3 * 1024 * 1024; // сайт стискає фото до ~0,3-1 МБ, це запас
+
+// Тип визначаємо за першими байтами файлу, а не за тим, що написав відправник.
+// Так у сховище не потрапить нічого, крім справжніх фото (наприклад, не проскочить HTML чи SVG зі скриптом).
+function detectImageType(buf) {
+  const b = new Uint8Array(buf.slice(0, 12));
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (b.length >= 4 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png";
+  const tag = (i, n) => String.fromCharCode(...b.slice(i, i + n));
+  if (b.length >= 12 && tag(0, 4) === "RIFF" && tag(8, 4) === "WEBP") return "image/webp";
+  return null;
+}
+const cleanImgId = (v) => (typeof v === "string" && IMG_ID.test(v) ? v : null);
 
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), {
@@ -124,6 +140,7 @@ export default async (req, context) => {
     const text = String(body?.body || "").trim().slice(0, 5000);
     const cat = CATEGORIES.includes(body?.cat) ? body.cat : CATEGORIES[0];
     if (!title || !text) return json({ error: "Заповни заголовок і текст" }, 400);
+    const img = cleanImgId(body?.img);
 
     const id = String(Date.now()).padStart(15, "0");
     const item = {
@@ -132,6 +149,7 @@ export default async (req, context) => {
       cat,
       body: text,
       date: new Date().toLocaleDateString("uk-UA", { timeZone: "Europe/Kyiv" }),
+      ...(img && { img }),
     };
     await store.setJSON(`news:${id}`, item);
     return json(item, 201);
@@ -148,8 +166,39 @@ export default async (req, context) => {
       return json({ ok: true });
     }
     if (!/^\d{15}$/.test(id)) return json({ error: "Новину не знайдено" }, 400);
+    const old = await store.get(`news:${id}`, { type: "json" });
+    if (cleanImgId(old?.img)) await store.delete(`img:${old.img}`);
     await store.delete(`news:${id}`);
     return json({ ok: true });
+  }
+
+  // ---------- Фото ----------
+  // Завантаження: тільки адмін. Тіло запиту = сам файл.
+  if (path === "/api/upload" && method === "POST") {
+    if (!passwordOk(req)) return json({ error: "Немає доступу" }, 401);
+    const buf = await req.arrayBuffer();
+    if (buf.byteLength === 0) return json({ error: "Файл порожній" }, 400);
+    if (buf.byteLength > MAX_IMG_BYTES) return json({ error: "Фото завелике (максимум 3 МБ)" }, 413);
+    if (!detectImageType(buf)) return json({ error: "Це не схоже на фото (потрібен JPEG, PNG або WebP)" }, 400);
+    const id = randomUUID();
+    await store.set(`img:${id}`, buf);
+    return json({ id }, 201);
+  }
+
+  // Показ фото: публічно. id випадковий і ніколи не повторюється, тому фото можна кешувати надовго.
+  if (path.startsWith("/api/img/") && method === "GET") {
+    const id = path.slice("/api/img/".length);
+    if (!IMG_ID.test(id)) return json({ error: "Не знайдено" }, 404);
+    const buf = await store.get(`img:${id}`, { type: "arrayBuffer" });
+    const type = buf && detectImageType(buf);
+    if (!type) return json({ error: "Не знайдено" }, 404);
+    return new Response(buf, {
+      headers: {
+        "content-type": type,
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-content-type-options": "nosniff",
+      },
+    });
   }
 
   // ---------- Події ----------
@@ -170,9 +219,10 @@ export default async (req, context) => {
     const when = String(body?.when || "").trim().slice(0, 40);
     const text = String(body?.body || "").trim().slice(0, 500);
     if (!title) return json({ error: "Впиши назву події" }, 400);
+    const img = cleanImgId(body?.img);
 
     const id = String(Date.now()).padStart(15, "0");
-    const item = { id, title, when, body: text };
+    const item = { id, title, when, body: text, ...(img && { img }) };
     await store.setJSON(`event:${id}`, item);
     return json(item, 201);
   }
@@ -187,6 +237,8 @@ export default async (req, context) => {
       return json({ ok: true });
     }
     if (!/^\d{15}$/.test(id)) return json({ error: "Подію не знайдено" }, 400);
+    const old = await store.get(`event:${id}`, { type: "json" });
+    if (cleanImgId(old?.img)) await store.delete(`img:${old.img}`);
     await store.delete(`event:${id}`);
     return json({ ok: true });
   }
