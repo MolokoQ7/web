@@ -1510,16 +1510,16 @@ footer{color:#bdbdc6!important}
                             <button id="registerTab" class="account-tab" onclick="accountTab('register')">Реєстрація</button>
                         </div>
                         <form id="userLoginForm" onsubmit="event.preventDefault(); userLogin()">
-                            <label>Логін</label>
-                            <input id="userLogin" autocomplete="username" maxlength="24" required placeholder="Твій логін">
+                            <label for="userLoginEmail">Електронна пошта</label>
+                            <input id="userLoginEmail" type="email" autocomplete="email" maxlength="254" required placeholder="name@example.com">
                             <label>Пароль</label>
                             <input id="userLoginPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••">
                             <button class="btn primary" id="userLoginBtn" type="submit">Увійти</button>
                             <p id="userLoginError" class="error"></p>
                         </form>
                         <form id="userRegisterForm" hidden onsubmit="event.preventDefault(); userRegister()">
-                            <label>Логін</label>
-                            <input id="userRegisterName" autocomplete="username" maxlength="24" required placeholder="Наприклад: Artem37">
+                            <label for="userRegisterEmail">Електронна пошта</label>
+                            <input id="userRegisterEmail" type="email" autocomplete="email" maxlength="254" required placeholder="name@example.com">
                             <label>Пароль</label>
                             <input id="userRegisterPassword" type="password" autocomplete="new-password" minlength="6" maxlength="128" required placeholder="Мінімум 6 символів">
                             <label>Повторіть пароль</label>
@@ -1532,7 +1532,7 @@ footer{color:#bdbdc6!important}
                         <h3>Твій акаунт</h3>
                         <p>Зареєструйся, щоб мати власний профіль на «Шкільному радіо 37».</p>
                         <div class="account-rules">
-                            <div>✓ Логін від 3 до 24 символів</div>
+                            <div>✓ Реєстрація за електронною поштою</div>
                             <div>✓ Пароль від 6 символів</div>
                             <div>✓ Пароль зберігається у захищеному вигляді</div>
                         </div>
@@ -2528,18 +2528,18 @@ footer{color:#bdbdc6!important}
                 currentUser = user || null;
                 $("accountLoggedOut").hidden = !!user;
                 $("accountLoggedIn").hidden = !user;
-                if (user) $("accountUsername").textContent = user.username;
+                if (user) $("accountUsername").textContent = user.email;
                 const nav = $("navAccount");
-                if (nav) nav.textContent = user ? `👤 ${user.username}` : "👤 Акаунт";
+                if (nav) nav.textContent = user ? `👤 ${user.email}` : "👤 Акаунт";
             }
 
             async function userLogin() {
-                const username = $("userLogin").value.trim();
+                const email = $("userLoginEmail").value.trim();
                 const password = $("userLoginPassword").value;
                 $("userLoginError").textContent = "";
                 $("userLoginBtn").disabled = true;
                 try {
-                    const data = await userApi("/user-login", { method: "POST", body: JSON.stringify({ username, password }) });
+                    const data = await userApi("/user-login", { method: "POST", body: JSON.stringify({ email, password }) });
                     userToken = data.token;
                     sessionStorage.setItem("r37user", userToken);
                     $("userLoginPassword").value = "";
@@ -2553,7 +2553,7 @@ footer{color:#bdbdc6!important}
             }
 
             async function userRegister() {
-                const username = $("userRegisterName").value.trim();
+                const email = $("userRegisterEmail").value.trim();
                 const password = $("userRegisterPassword").value;
                 const password2 = $("userRegisterPassword2").value;
                 $("userRegisterError").textContent = "";
@@ -2563,7 +2563,7 @@ footer{color:#bdbdc6!important}
                 }
                 $("userRegisterBtn").disabled = true;
                 try {
-                    const data = await userApi("/register", { method: "POST", body: JSON.stringify({ username, password }) });
+                    const data = await userApi("/register", { method: "POST", body: JSON.stringify({ email, password }) });
                     userToken = data.token;
                     sessionStorage.setItem("r37user", userToken);
                     setAccountView(data.user);
