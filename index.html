@@ -1473,13 +1473,24 @@ footer{color:#bdbdc6!important}
                     <label for="subTitle">Заголовок</label>
                     <input id="subTitle" placeholder="Наприклад: У нас в класі..." maxlength="150" oninput="counter('subTitle','subTitleCount',150)">
                     <div class="count" id="subTitleCount">0 / 150</div>
-                    <span class="lbl" id="subCatLabel">Категорія</span>
-                    <div class="chips" role="radiogroup" aria-labelledby="subCatLabel">
-                        <label class="chip"><input type="radio" name="subCat" value="Школа" checked><span>🏫 Школа</span></label>
-                        <label class="chip"><input type="radio" name="subCat" value="Оголошення"><span>📢 Оголошення</span></label>
-                        <label class="chip"><input type="radio" name="subCat" value="Події"><span>🎉 Події</span></label>
-                        <label class="chip"><input type="radio" name="subCat" value="8 клас"><span>🎒 8 клас</span></label>
-                    </div>
+                    <label for="subCat">Категорія або клас</label>
+                    <select id="subCat" name="subCat">
+                        <option value="Школа">🏫 Школа</option>
+                        <option value="Оголошення">📢 Оголошення</option>
+                        <option value="Події">🎉 Події</option>
+                        <optgroup label="Клас">
+                            <option value="1-А клас">1-А клас</option>
+                            <option value="2-А клас">2-А клас</option>
+                            <option value="3-А клас">3-А клас</option>
+                            <option value="4-А клас">4-А клас</option>
+                            <option value="5-А клас">5-А клас</option>
+                            <option value="6-А клас">6-А клас</option>
+                            <option value="7-А клас">7-А клас</option>
+                            <option value="8-А клас">8-А клас</option>
+                            <option value="9-А клас">9-А клас</option>
+                            <option value="9-Б клас">9-Б клас</option>
+                        </optgroup>
+                    </select>
                     <label for="subBody">Текст</label>
                     <textarea id="subBody" placeholder="Опиши свою ідею…" maxlength="5000"></textarea>
                     <label for="subVideo">Відео <small style="font-weight:400;color:var(--muted)">(необов'язково — посилання на YouTube або файл)</small></label>
@@ -2158,8 +2169,7 @@ footer{color:#bdbdc6!important}
                     return;
                 }
 
-                const catInput = document.querySelector('input[name="subCat"]:checked');
-                const cat = catInput ? catInput.value : "Школа";
+                const cat = $("subCat").value || "Школа";
                 const video = $("subVideo").value.trim();
                 const btn = $("subSendBtn");
 
