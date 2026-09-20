@@ -1,13 +1,17 @@
-# Шкільне радіо 37: адмін-доступ
+# Шкільне радіо 37
+
+## Анонімка
+Форма на сайті створює **нову** заявку через `POST /api/submissions`. Сервер генерує унікальний ID, зберігає заявку в Netlify Blobs, а адмін може її переглянути, відредагувати, опублікувати або видалити.
 
 ## Структура
-- index.html: сайт
-- netlify/functions/api.mjs: сервер (новини, голосування, вхід адміна)
-- package.json: залежність @netlify/blobs (спільне сховище)
+- `index.html` — сайт і форма анонімки
+- `netlify/functions/api.mjs` — серверний API
+- `package.json` — залежність Netlify Blobs
+- `netlify.toml` — підключення serverless function
 
-## Налаштування
-1. Задеплой папку на Netlify через GitHub або Netlify CLI (`netlify deploy --prod`).
-2. Netlify → Site configuration → Environment variables → додай
-   ADMIN_PASSWORD = довгий пароль, який знаєш тільки ти.
-3. Зроби Deploy ще раз, щоб змінна почала працювати.
-4. Відкрий сайт → «Адмін» → введи пароль.
+## Netlify
+1. Завантаж усю цю папку/репозиторій у Netlify.
+2. У Environment variables додай `ADMIN_PASSWORD`.
+3. Зроби новий deploy.
+
+Не клади `api.mjs` просто в корінь: він має бути саме в `netlify/functions/api.mjs`.
