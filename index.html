@@ -802,6 +802,50 @@
                 margin-top: 6px
             }
 
+            .video-upload-box {
+                margin: 7px 0 14px
+            }
+            .video-drop {
+                margin-top: 0
+            }
+            .video-or {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin: 10px 0;
+                color: var(--muted);
+                font-size: 12px
+            }
+            .video-or::before, .video-or::after {
+                content: "";
+                height: 1px;
+                flex: 1;
+                background: currentColor;
+                opacity: .35
+            }
+            .video-preview {
+                position: relative;
+                margin-top: 7px;
+                border-radius: 14px;
+                overflow: hidden;
+                background: #111
+            }
+            .video-preview video {
+                display: block;
+                width: 100%;
+                max-height: 300px;
+                background: #080808
+            }
+            .video-preview .icon-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                z-index: 2;
+                box-shadow: 0 4px 12px #0006
+            }
+            .video-preview .meta {
+                padding: 7px 10px
+            }
             /* ---------- Відео ---------- */
             .vid-wrap {
                 position: relative;
@@ -1351,6 +1395,23 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
  main{width:calc(100% - 18px)!important;padding-top:20px!important}.brand{font-size:28px!important}.logo{font-size:42px!important}.hero{padding:25px!important;min-height:220px!important}.hero h1{font-size:30px!important}nav{width:calc(100% - 18px)!important;top:5px!important}nav button{padding:9px 10px!important;font-size:13px!important}
 }
 </style>
+
+<style>
+body{font-size:16px;line-height:1.55;letter-spacing:.1px}
+h1,h2,h3,h4,h5,h6{color:#fff!important;line-height:1.25;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+p,li,span{text-shadow:0 1px 4px rgba(0,0,0,.18)}
+p,small,.muted,label{color:#d0d0d8!important}
+.card p,.news-card p,.event-card p,.poll-card p,.card .muted,.news-card .muted,.event-card .muted{color:#d6d6de!important}
+.card,.news-card,.event-card,.poll-card,form,.admin-box,.panel,.modal-content{color:#f7f7f9!important}
+nav a,nav button{color:#eeeef2!important;font-weight:700!important}
+nav a:hover,nav a.active,nav button:hover,nav button.active{color:#fff!important}
+.btn,.btn.primary,button{font-weight:800!important;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+input,textarea,select{color:#fff!important;font-size:16px!important}
+input::placeholder,textarea::placeholder{color:#8f8f9a!important;opacity:1!important}
+.tag,.badge,.category{font-weight:800!important}
+a{font-weight:700}
+footer{color:#bdbdc6!important}
+</style>
 </head>
     <body>
         <header>
@@ -1496,8 +1557,20 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                                     <div class="meta photo-size" id="photoSize-news"></div>
                                 </div>
                             </div>
-                            <label for="newsVideo">Відео <small style="font-weight:400;color:var(--muted)">(необов'язково — посилання на YouTube або файл)</small></label>
-                            <input id="newsVideo" placeholder="https://youtube.com/watch?v=… або https://…/video.mp4" maxlength="500">
+                            <label for="newsVideo">Відео <small style="font-weight:400;color:var(--muted)">(необов'язково)</small></label>
+                            <div class="video-upload-box">
+                                <label class="photo-drop video-drop" id="videoDrop-news">
+                                    <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" id="videoInput-news" onchange="videoChosen('news')">
+                                    <span>🎬 Додати відео з галереї</span>
+                                </label>
+                                <div class="video-preview" id="videoPrev-news" hidden>
+                                    <video id="videoPlayer-news" controls playsinline preload="metadata"></video>
+                                    <button type="button" class="icon-btn danger" onclick="clearVideo('news')" title="Прибрати відео" aria-label="Прибрати відео">✕</button>
+                                    <div class="meta" id="videoSize-news"></div>
+                                </div>
+                                <div class="video-or">або встав посилання</div>
+                                <input id="newsVideo" placeholder="https://youtube.com/watch?v=… або https://…/video.mp4" maxlength="500">
+                            </div>
                             <div class="row">
                                 <span class="meta">Новина одразу з'явиться на сайті</span>
                                 <button class="btn primary" id="publishBtn" onclick="addNews()">Опублікувати</button>
@@ -1531,8 +1604,20 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                                     <div class="meta photo-size" id="photoSize-event"></div>
                                 </div>
                             </div>
-                            <label for="evVideo">Відео <small style="font-weight:400;color:var(--muted)">(необов'язково — посилання на YouTube або файл)</small></label>
-                            <input id="evVideo" placeholder="https://youtube.com/watch?v=… або https://…/video.mp4" maxlength="500">
+                            <label for="evVideo">Відео <small style="font-weight:400;color:var(--muted)">(необов'язково)</small></label>
+                            <div class="video-upload-box">
+                                <label class="photo-drop video-drop" id="videoDrop-event">
+                                    <input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*" id="videoInput-event" onchange="videoChosen('event')">
+                                    <span>🎬 Додати відео з галереї</span>
+                                </label>
+                                <div class="video-preview" id="videoPrev-event" hidden>
+                                    <video id="videoPlayer-event" controls playsinline preload="metadata"></video>
+                                    <button type="button" class="icon-btn danger" onclick="clearVideo('event')" title="Прибрати відео" aria-label="Прибрати відео">✕</button>
+                                    <div class="meta" id="videoSize-event"></div>
+                                </div>
+                                <div class="video-or">або встав посилання</div>
+                                <input id="evVideo" placeholder="https://youtube.com/watch?v=… або https://…/video.mp4" maxlength="500">
+                            </div>
                             <div class="row">
                                 <span class="meta">Подія одразу з'явиться на вкладці «Події»</span>
                                 <button class="btn primary" id="evPublishBtn" onclick="addEvent()">Додати подію</button>
@@ -1658,6 +1743,8 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                 $("publishBtn").textContent = "Публікую…";
                 try {
                     const img = await uploadPhoto("news");
+                    const uploadedVideo = await uploadVideo("news");
+                    const video = uploadedVideo || $("newsVideo").value.trim();
                     await api("/news", {
                         method: "POST",
                         body: JSON.stringify({
@@ -1665,7 +1752,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                             cat,
                             body: b,
                             img,
-                            video: $("newsVideo").value.trim()
+                            video
                         })
                     });
                     $("title").value = "";
@@ -1673,6 +1760,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                     $("newsVideo").value = "";
                     counter("title", "titleCount", 150);
                     clearPhoto("news");
+                    clearVideo("news");
                     await renderNews();
                     toast("Новину опубліковано!")
                 } catch (e) {
@@ -1767,6 +1855,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
 
             /* ---------- Фото ---------- */
             const photos = {};
+            const videos = {};
             const picHtml = (img, alt) => img ? `<img class="pic" src="/api/img/${esc(img)}" alt="${esc(alt)}" loading="lazy" onerror="this.remove()">` : "";
             const thumbHtml = img => img ? `<img class="thumb" src="/api/img/${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : "";
 
@@ -1777,7 +1866,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                     return "";
                 let u;
                 try {
-                    u = new URL(url)
+                    u = new URL(url, location.origin)
                 } catch {
                     return ""
                 }
@@ -1885,6 +1974,61 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                 return data.id
             }
 
+            // ---------- Відео з галереї ----------
+            async function videoChosen(kind) {
+                const input = $("videoInput-" + kind);
+                const file = input.files[0];
+                input.value = "";
+                if (!file) return;
+                if (!file.type.startsWith("video/")) {
+                    toast("Обери відеофайл.", "err");
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    toast("Відео завелике. Максимальний розмір — 5 МБ.", "err");
+                    return;
+                }
+                try {
+                    clearVideo(kind);
+                    videos[kind] = file;
+                    const player = $("videoPlayer-" + kind);
+                    player.src = URL.createObjectURL(file);
+                    $("videoSize-" + kind).textContent = "Розмір: " + Math.max(1, Math.round(file.size / 1024)) + " КБ";
+                    $("videoPrev-" + kind).hidden = false;
+                    $("videoDrop-" + kind).hidden = true;
+                } catch (e) {
+                    toast("Не вдалося відкрити відео.", "err");
+                }
+            }
+            function clearVideo(kind) {
+                const player = $("videoPlayer-" + kind);
+                if (player && player.src && player.src.startsWith("blob:")) URL.revokeObjectURL(player.src);
+                if (player) {
+                    player.pause();
+                    player.removeAttribute("src");
+                    player.load();
+                }
+                delete videos[kind];
+                $("videoPrev-" + kind).hidden = true;
+                $("videoDrop-" + kind).hidden = false;
+            }
+            async function uploadVideo(kind) {
+                if (!videos[kind]) return null;
+                const res = await fetch("/api/video-upload", {
+                    method: "POST",
+                    headers: {
+                        "content-type": videos[kind].type || "application/octet-stream",
+                        "x-admin-password": adminPassword
+                    },
+                    body: videos[kind]
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw Object.assign(new Error(data.error || "Не вдалося завантажити відео."), { status: res.status });
+                }
+                return data.url || (data.id ? "/api/video/" + data.id : null);
+            }
+
             /* ---------- Події ---------- */
             async function renderEvents() {
                 try {
@@ -1915,6 +2059,8 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                 $("evPublishBtn").textContent = "Додаю…";
                 try {
                     const img = await uploadPhoto("event");
+                    const uploadedVideo = await uploadVideo("event");
+                    const video = uploadedVideo || $("evVideo").value.trim();
                     await api("/events", {
                         method: "POST",
                         body: JSON.stringify({
@@ -1922,7 +2068,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                             when: $("evWhen").value.trim(),
                             body: $("evBody").value.trim(),
                             img,
-                            video: $("evVideo").value.trim()
+                            video
                         })
                     });
                     $("evTitle").value = "";
@@ -1930,6 +2076,7 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
                     $("evBody").value = "";
                     $("evVideo").value = "";
                     clearPhoto("event");
+                    clearVideo("event");
                     await renderEvents();
                     toast("Подію додано!")
                 } catch (e) {
@@ -2313,19 +2460,48 @@ hr{border-color:#292d36!important}a{color:#ff72b0!important}
             checkHash();
         </script>
     
-<style id="white-redesign">
-:root{--p:#e91e78!important;--p2:#ff4f9a!important;--bg:#fff!important;--text:#111!important;--muted:#737373!important;--card:#fff!important;}
-html,body{background:#fff!important;color:#111!important}
-header{background:#fff!important;color:#111!important;border-bottom:1px solid #ededf0!important;box-shadow:0 5px 24px rgba(0,0,0,.045)!important}
-nav{background:rgba(255,255,255,.94)!important;border-bottom:1px solid #ededf0!important}
-nav a{color:#555!important}nav a:hover,nav a.active{color:#e91e78!important}
-.hero,.card,.news-card,.event-card,.poll-card,.admin-card,form,.panel,.photo-card,.video-card{background:#fff!important;border:1px solid #ececf0!important;box-shadow:0 12px 35px rgba(0,0,0,.055)!important}
-button,.btn,.button{background:#111!important;color:#fff!important;border-color:#111!important;box-shadow:4px 4px 0 #e91e78!important}
-button:hover,.btn:hover,.button:hover{background:#e91e78!important;border-color:#e91e78!important;box-shadow:4px 4px 0 #111!important}
-input,textarea,select{background:#fff!important;color:#111!important;border:1px solid #dedee4!important}
-input:focus,textarea:focus,select:focus{border-color:#e91e78!important;box-shadow:0 0 0 3px rgba(233,30,120,.1)!important}
-h1,h2,h3,h4{color:#111!important}.badge,.tag,.category{background:#fff0f7!important;color:#d3166b!important;border:1px solid #f5c2da!important}
-footer{background:#111!important;color:#fff!important;border-top:3px solid #e91e78!important}
+
+
+<style id="dark-readable-redesign">
+:root{--p:#f12b86!important;--p2:#ff65ad!important;--bg:#17191f!important;--text:#f5f7fb!important;--muted:#b8beca!important;--card:#23262e!important}
+html,body{background:#17191f!important;color:#f5f7fb!important}
+body{min-height:100vh;line-height:1.55;background:radial-gradient(circle at 12% 0%,rgba(241,43,134,.10),transparent 28%),radial-gradient(circle at 90% 20%,rgba(255,101,173,.06),transparent 24%),#17191f!important}
+header{background:radial-gradient(circle at 18% 30%,rgba(241,43,134,.16),transparent 28%),linear-gradient(135deg,#14161c,#20232b)!important;color:#fff!important;border-bottom:1px solid #353943!important;box-shadow:0 8px 30px rgba(0,0,0,.28)!important}
+header h1,header h2,header h3,header p,.brand{color:#fff!important}
+nav{background:rgba(27,30,37,.97)!important;border-bottom:1px solid #3a3e49!important;box-shadow:0 5px 20px rgba(0,0,0,.18)!important}
+nav a{color:#dce0e8!important;border-color:transparent!important}
+nav a:hover{color:#fff!important;background:#30343d!important}
+nav a.active{color:#fff!important;background:linear-gradient(135deg,#ed277f,#ff4d9b)!important;box-shadow:0 6px 18px rgba(241,43,134,.22)!important}
+.hero,.card,.news-card,.event-card,.poll-card,.admin-card,form,.panel,.photo-card,.video-card{background:linear-gradient(145deg,#252830,#20232a)!important;color:#f5f7fb!important;border:1px solid #393e49!important;box-shadow:0 12px 35px rgba(0,0,0,.24)!important}
+.hero{background:radial-gradient(circle at 78% 50%,rgba(241,43,134,.13),transparent 32%),linear-gradient(145deg,#252830,#1f2229)!important}
+.card:hover,.news-card:hover,.event-card:hover,.photo-card:hover,.video-card:hover{border-color:#555b68!important;box-shadow:0 16px 38px rgba(0,0,0,.30)!important}
+h1,h2,h3,h4,h5,h6,.hero h1,.hero h2,.card h1,.card h2,.card h3,.news-card h1,.news-card h2,.news-card h3{color:#fff!important;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+p,li,span,label,small{color:#eef1f6}
+.muted,.meta,.date,.description,.hint{color:#c1c6d0!important}
+a{color:#ff63aa!important}a:hover{color:#ff8ac0!important}
+hr{border:0!important;border-top:1px solid #3b404b!important}
+button,.btn,.button{background:linear-gradient(135deg,#ef287f,#ff4e9c)!important;color:#fff!important;border:1px solid #ff5ba5!important;box-shadow:0 7px 18px rgba(241,43,134,.20)!important;font-weight:700!important}
+button:hover,.btn:hover,.button:hover{background:linear-gradient(135deg,#ff4e9c,#ff71b3)!important;transform:translateY(-1px)}
+input,textarea,select{background:#1a1d24!important;color:#f5f7fb!important;border:1px solid #444955!important}
+input::placeholder,textarea::placeholder{color:#858c99!important}
+input:focus,textarea:focus,select:focus{border-color:#f13b8d!important;box-shadow:0 0 0 3px rgba(241,43,134,.13)!important;outline:none!important}
+option{background:#23262e!important;color:#fff!important}
+.badge,.tag,.category{background:rgba(241,43,134,.14)!important;color:#ff70b2!important;border:1px solid rgba(241,43,134,.42)!important}
+img,video{border-color:#3c414c!important}video{background:#101217!important}
+footer{margin-top:auto!important;background:#111319!important;color:#e9edf4!important;border-top:2px solid #ef2a82!important;box-shadow:0 -8px 25px rgba(0,0,0,.22)!important}
+footer *{color:#e9edf4!important}
+@media(max-width:700px){body{background:#191b21!important}.hero,.card,.news-card,.event-card,.poll-card,.admin-card,form,.panel{box-shadow:0 8px 24px rgba(0,0,0,.22)!important}}
+
+/* ANONYMKA — readable dark form */
+#submit .card{background:linear-gradient(145deg,#252832,#1e2129)!important;border:1px solid #3a3e49!important;color:#f5f6fa!important}
+#submit .sub-note{background:#30343e!important;color:#d9dbe2!important;border:1px solid #414652!important}
+#submit label,#submit .lbl,#submit .count{color:#f0f1f5!important}
+#submit input:not([type="radio"]):not([type="checkbox"]),#submit textarea,#submit select{background:#15171d!important;color:#fff!important;border:1px solid #4a4f5c!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)!important}
+#submit input:not([type="radio"]):not([type="checkbox"])::placeholder,#submit textarea::placeholder{color:#9da1ad!important}
+#submit input:not([type="radio"]):not([type="checkbox"]):focus,#submit textarea:focus,#submit select:focus{background:#191c23!important;color:#fff!important;border-color:#ff2f8a!important;box-shadow:0 0 0 3px rgba(255,47,138,.16)!important}
+#submit .chip span{background:#292d37!important;color:#f3f4f7!important;border-color:#444956!important}
+#submit .chip input:checked + span{background:#ff2f8a!important;color:#fff!important;border-color:#ff2f8a!important}
+#submit .btn{color:#fff!important}
 </style>
 </body>
 </html>
