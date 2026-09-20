@@ -1425,6 +1425,7 @@ footer{color:#bdbdc6!important}
             <button onclick="show('poll',this)">🗳️ Голосування</button>
             <button onclick="show('events',this)">📅 Події</button>
             <button onclick="show('submit',this)">✉️ Анонімка</button>
+            <button id="navAccount" onclick="show('account',this)">👤 Акаунт</button>
             <button id="navAdmin" hidden onclick="show('admin',this)">🔐 Адмін</button>
         </nav>
         <main>
@@ -1487,6 +1488,53 @@ footer{color:#bdbdc6!important}
                         <span class="meta">Приклад побачить лише адмін</span>
                         <button class="btn primary" id="subSendBtn" onclick="submitAnon()">Надіслати анонімно</button>
                     </div>
+                </div>
+            </section>
+            <section id="account" class="page">
+                <h2>👤 Акаунт</h2>
+                <div id="accountLoggedOut" class="account-grid">
+                    <div class="card account-card">
+                        <div class="account-tabs">
+                            <button id="loginTab" class="account-tab active" onclick="accountTab('login')">Увійти</button>
+                            <button id="registerTab" class="account-tab" onclick="accountTab('register')">Реєстрація</button>
+                        </div>
+                        <form id="userLoginForm" onsubmit="event.preventDefault(); userLogin()">
+                            <label>Логін</label>
+                            <input id="userLogin" autocomplete="username" maxlength="24" required placeholder="Твій логін">
+                            <label>Пароль</label>
+                            <input id="userLoginPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••">
+                            <button class="btn primary" id="userLoginBtn" type="submit">Увійти</button>
+                            <p id="userLoginError" class="error"></p>
+                        </form>
+                        <form id="userRegisterForm" hidden onsubmit="event.preventDefault(); userRegister()">
+                            <label>Логін</label>
+                            <input id="userRegisterName" autocomplete="username" maxlength="24" required placeholder="Наприклад: Artem37">
+                            <label>Пароль</label>
+                            <input id="userRegisterPassword" type="password" autocomplete="new-password" minlength="6" maxlength="128" required placeholder="Мінімум 6 символів">
+                            <label>Повторіть пароль</label>
+                            <input id="userRegisterPassword2" type="password" autocomplete="new-password" minlength="6" maxlength="128" required placeholder="Повтори пароль">
+                            <button class="btn primary" id="userRegisterBtn" type="submit">Створити акаунт</button>
+                            <p id="userRegisterError" class="error"></p>
+                        </form>
+                    </div>
+                    <div class="card account-info">
+                        <h3>Твій акаунт</h3>
+                        <p>Зареєструйся, щоб мати власний профіль на «Шкільному радіо 37».</p>
+                        <div class="account-rules">
+                            <div>✓ Логін від 3 до 24 символів</div>
+                            <div>✓ Пароль від 6 символів</div>
+                            <div>✓ Пароль зберігається у захищеному вигляді</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="accountLoggedIn" class="card account-profile" hidden>
+                    <div class="profile-icon">👤</div>
+                    <div>
+                        <div class="meta">Ви увійшли як</div>
+                        <h3 id="accountUsername"></h3>
+                        <p>Акаунт успішно активний на цьому пристрої.</p>
+                    </div>
+                    <button class="btn" onclick="userLogout()">Вийти</button>
                 </div>
             </section>
             <section id="admin" class="page">
@@ -2426,6 +2474,101 @@ footer{color:#bdbdc6!important}
                 scrollTo(0, 0)
             }
 
+            /* ---------- Акаунти ---------- */
+            let userToken = sessionStorage.getItem("r37user") || "";
+            let currentUser = null;
+
+            function accountTab(tab) {
+                const login = tab === "login";
+                $("loginTab").classList.toggle("active", login);
+                $("registerTab").classList.toggle("active", !login);
+                $("userLoginForm").hidden = !login;
+                $("userRegisterForm").hidden = login;
+            }
+
+            async function userApi(path, opts = {}) {
+                const headers = { ...(opts.headers || {}), "content-type": "application/json" };
+                if (userToken) headers["x-user-token"] = userToken;
+                if (adminPassword) headers["x-admin-password"] = adminPassword;
+                const res = await fetch("/api" + path, { ...opts, headers });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw Object.assign(new Error(data.error || "Помилка сервера"), { status: res.status });
+                return data;
+            }
+
+            function setAccountView(user) {
+                currentUser = user || null;
+                $("accountLoggedOut").hidden = !!user;
+                $("accountLoggedIn").hidden = !user;
+                if (user) $("accountUsername").textContent = user.username;
+                const nav = $("navAccount");
+                if (nav) nav.textContent = user ? `👤 ${user.username}` : "👤 Акаунт";
+            }
+
+            async function userLogin() {
+                const username = $("userLogin").value.trim();
+                const password = $("userLoginPassword").value;
+                $("userLoginError").textContent = "";
+                $("userLoginBtn").disabled = true;
+                try {
+                    const data = await userApi("/user-login", { method: "POST", body: JSON.stringify({ username, password }) });
+                    userToken = data.token;
+                    sessionStorage.setItem("r37user", userToken);
+                    $("userLoginPassword").value = "";
+                    setAccountView(data.user);
+                    toast("Вітаємо! Ти увійшов в акаунт.");
+                } catch (e) {
+                    $("userLoginError").textContent = e.message;
+                } finally {
+                    $("userLoginBtn").disabled = false;
+                }
+            }
+
+            async function userRegister() {
+                const username = $("userRegisterName").value.trim();
+                const password = $("userRegisterPassword").value;
+                const password2 = $("userRegisterPassword2").value;
+                $("userRegisterError").textContent = "";
+                if (password !== password2) {
+                    $("userRegisterError").textContent = "Паролі не збігаються.";
+                    return;
+                }
+                $("userRegisterBtn").disabled = true;
+                try {
+                    const data = await userApi("/register", { method: "POST", body: JSON.stringify({ username, password }) });
+                    userToken = data.token;
+                    sessionStorage.setItem("r37user", userToken);
+                    setAccountView(data.user);
+                    toast("Акаунт створено!");
+                } catch (e) {
+                    $("userRegisterError").textContent = e.message;
+                } finally {
+                    $("userRegisterBtn").disabled = false;
+                }
+            }
+
+            async function userLogout() {
+                try { await userApi("/user-logout", { method: "POST" }); } catch {}
+                userToken = "";
+                sessionStorage.removeItem("r37user");
+                setAccountView(null);
+                accountTab("login");
+                toast("Ти вийшов з акаунта.");
+            }
+
+            async function restoreUserSession() {
+                if (!userToken) return setAccountView(null);
+                try {
+                    const data = await userApi("/me");
+                    if (data.loggedIn) setAccountView(data.user);
+                    else { userToken = ""; sessionStorage.removeItem("r37user"); setAccountView(null); }
+                } catch {
+                    userToken = "";
+                    sessionStorage.removeItem("r37user");
+                    setAccountView(null);
+                }
+            }
+
             /* ---------- Секретний вхід для адміна ---------- */
             // Кнопки «Адмін» у меню немає. Відкрити вхід можна двома способами:
             // 1) швидко натиснути на логотип 📻 п'ять разів; 2) відкрити сайт з адресою, що закінчується на #staff37
@@ -2457,6 +2600,7 @@ footer{color:#bdbdc6!important}
             renderEvents();
             renderPoll();
             restoreSession();
+            restoreUserSession();
             checkHash();
         </script>
     
@@ -2502,6 +2646,23 @@ footer *{color:#e9edf4!important}
 #submit .chip span{background:#292d37!important;color:#f3f4f7!important;border-color:#444956!important}
 #submit .chip input:checked + span{background:#ff2f8a!important;color:#fff!important;border-color:#ff2f8a!important}
 #submit .btn{color:#fff!important}
+
+/* АКАУНТИ */
+.account-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:18px;align-items:stretch}
+.account-card,.account-info,.account-profile{background:linear-gradient(145deg,#292d36,#22262e)!important;border:1px solid #454b57!important;color:#f5f7fb!important}
+.account-tabs{display:flex;gap:8px;padding:5px;background:#191c22;border:1px solid #3b414d;border-radius:14px;margin-bottom:18px}
+.account-tab{flex:1;background:transparent!important;border:0!important;box-shadow:none!important;color:#bfc5d0!important;border-radius:10px}
+.account-tab.active{background:#f12b86!important;color:#fff!important}
+.account-card form{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.account-card label{display:block;margin:12px 0 6px;font-weight:700;color:#eef1f6!important}
+.account-card input{width:100%;box-sizing:border-box}
+.account-info{display:flex;flex-direction:column;justify-content:center}
+.account-rules{display:grid;gap:10px;margin-top:18px;color:#d5dae3}
+.account-profile{display:flex;align-items:center;gap:18px;padding:24px}
+.profile-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:16px;background:rgba(241,43,134,.14);border:1px solid rgba(241,43,134,.4);font-size:28px}
+.account-profile h3{margin:2px 0;color:#fff!important}
+.account-profile .btn{margin-left:auto}
+@media(max-width:700px){.account-grid{grid-template-columns:1fr}.account-profile{align-items:flex-start;flex-wrap:wrap}.account-profile .btn{margin-left:0;width:100%}}
 </style>
 </body>
 </html>
